@@ -16,30 +16,32 @@ mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', 
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
-document.getElementById('lead-form').addEventListener('submit', event => {
-  event.preventDefault();
-  const form = event.currentTarget;
-  const data = new FormData(form);
-  const lines = [
-    'Hello Nafaka Foods, I would like a free smart vending site assessment.',
-    '',
-    `Name: ${data.get('name')}`,
-    `Organisation / Building: ${data.get('organisation')}`,
-    `Phone: ${data.get('phone')}`,
-    `Property type: ${data.get('type')}`
-  ];
-  if (data.get('message')) lines.push(`Notes: ${data.get('message')}`);
-  window.open(`https://wa.me/256776974521?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener');
+const leadForm = document.getElementById('lead-form');
+if (leadForm) {
+  leadForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const lines = [
+      `Hello Nafaka Foods, I would like to enquire about ${data.get('interest') || 'your products and services'}.`,
+      '',
+      `Name: ${data.get('name')}`
+    ];
+    if (data.get('organisation')) lines.push(`Organisation: ${data.get('organisation')}`);
+    lines.push(`Phone: ${data.get('phone')}`, `Interested in: ${data.get('interest')}`);
+    if (data.get('message')) lines.push(`Notes: ${data.get('message')}`);
+    window.open(`https://wa.me/256776974521?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener');
 
-  const button = form.querySelector('.button-green');
-  const originalLabel = button.innerHTML;
-  button.disabled = true;
-  button.innerHTML = 'Opening WhatsApp…';
-  setTimeout(() => {
-    button.disabled = false;
-    button.innerHTML = originalLabel;
-  }, 2200);
-});
+    const button = form.querySelector('.button-green');
+    const originalLabel = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = 'Opening WhatsApp…';
+    setTimeout(() => {
+      button.disabled = false;
+      button.innerHTML = originalLabel;
+    }, 2200);
+  });
+}
 
 /* ---------------------------------------------------------------------
    Progressive motion layer: Lenis smooth scroll + GSAP/ScrollTrigger.
