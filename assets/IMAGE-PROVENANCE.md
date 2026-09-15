@@ -1,29 +1,37 @@
-# Web image provenance and prompts
+# Nafaka Foods web image provenance
 
-These photographs are AI-generated campaign/category illustrations. They must not be presented as actual Nafaka staff, customers, sites, inventory, certifications or endorsements. The raw portrait references are excluded from the repository.
+The site uses commissioned AI-generated campaign imagery. It is illustrative brand photography, not documentary evidence of Nafaka staff, customers, facilities, stock, certifications or endorsements.
 
-## Asset mapping
+The supplied portrait references were used only to guide appearance in selected campaign scenes. Raw portraits are deliberately excluded from the public repository.
 
-| Web asset prefix in assets/images/ | Original generated filename | Purpose |
+## Fresh-run production assets
+
+| Production files | Generated original | Website role |
 | --- | --- | --- |
-| quality-desktop | exec-ff200517-9381-48db-9807-944c5f1f3bee.png | Approved direction A, desktop |
-| quality-mobile | exec-8fdb65d7-24ee-4553-8ea2-b9320bc5bfbc.png | Approved direction A, dedicated mobile composition |
-| table-desktop | exec-6f3f7455-dfce-44fe-bb21-8ab9f18250bc.png | Approved direction B, desktop companion retained for future placement |
-| table-mobile | exec-b2e9e379-ebe5-40dc-823a-e0470727718a.png | Direction B food-story photograph used on Home |
-| rice | exec-1b45b591-f6ea-4392-9293-ea765614b838.png | General rice category still life |
-| grains | exec-fc9036bf-a24b-41f8-b141-c76ea0c6f106.png | Beans, soya and maize still life |
+| images/v3/hero-desktop-* | exec-4fca5bb8-8669-4b47-a131-02b2d798f0a4.png | Homepage desktop rice campaign hero |
+| images/v3/hero-mobile-* | exec-e5c892e7-111e-40c3-8878-c4b42cb4a505.png | Dedicated mobile hero composition |
+| images/v3/rice-range-* | exec-5c769a24-d4fc-4fb3-af06-314cfeca75a3.png | Rice-range editorial still life |
+| images/v3/supply-* | exec-8affcee6-2607-4ed2-94f7-611468869702.png | Business supply story |
+| images/v3/vending-desktop-* | exec-4788df32-4c24-4efa-a9ad-46d742cff4f4.png | Vending desktop campaign image |
+| images/v3/vending-mobile-* | exec-81dff4de-6ec7-4efa-9e50-820ebea314bf.png | Dedicated mobile vending composition |
 
-Files use width suffixes (-480, -720, -960 or -1440) and WebP encoding at quality 85. Resizing/compression does not alter subjects or invent product details. Generated originals remain separately preserved; the production candidate files live in this repository.
+Production files are resized WebP exports. The generated originals are preserved separately in the project handoff pack.
 
-Existing assets/hero-desktop-v2.webp remains the illustrative vending concept image, with a final-equipment disclaimer. No new machine capabilities are inferred from its appearance.
+## Visual constraints used
 
-The image tool used is the built-in image generator. It does not expose a model selector, so there is no claim that Sunburt 2.5 was used. Earlier human campaign prompts are preserved in the user's Nafaka-Visual-Reference-Pack.zip; that archive contains raw references and must not be uploaded to this public repository.
+- Rice remains the unmistakable core of the primary brand imagery.
+- Forest green, rice ivory, pale timber and restrained brass define the campaign palette.
+- Desktop hero scenes reserve useful left-side space for accessible live HTML copy.
+- Mobile images are independently recomposed so faces, hands, rice and vending-machine controls remain inside a safe central frame.
+- Product images include no embedded headlines, fabricated product labels or unverifiable packaging.
+- Vending imagery depicts sealed snacks and cold drinks only, with no fresh meals, hot beverages or alcohol.
+- The vending machine remains forest green with brass trim, five shelves, a touchscreen, contactless reader, dispense flap and botanical linework.
+- No raw portrait reference is shipped publicly.
 
-## Rice still life — exact prompt
+## Legacy campaign assets
 
-Use case: photorealistic-natural. Create one landscape 3:2 high-resolution editorial still-life photograph for the rice range on Nafaka Foods' Uganda-based grain website. An artisan shallow ivory ceramic bowl full of uncooked white long-grain rice, centered slightly right, on a warm pale-stone surface, with a folded deep forest-green linen cloth passing under its left edge and a small number of loose grains on the table. Camera overhead at a subtle angle, entire bowl inside frame with generous breathing room; softly directional natural window light from upper left and delicate real shadows. Accurate uncooked rice grain size, faint translucency and irregular natural details; tangible ceramic texture and linen weave. Restrained premium food publication photography, ivory and forest palette, not luxury gold or stock-photo gloss. No text, labels, packaging, people, logos, decorative wheat or extra food. This is general illustrative category imagery, not a named cultivar or a verified stock photograph.
+The earlier quality, table, rice and grains WebP assets remain in the repository for archive continuity and possible secondary use. The fresh-run pages primarily reference the images/v3 set.
 
-## Grain trio — exact prompt
+## Generator transparency
 
-Use case: photorealistic-natural. Create one landscape 3:2 high-resolution editorial ingredient still-life photograph for a Ugandan grain trading company website. Exactly three simple shallow ivory ceramic bowls arranged as a loose close triangular grouping on a warm pale-stone surface. One bowl contains dry red kidney beans, one contains dry whole pale golden soya beans with natural hilum marks, and one contains dry yellow maize kernels. The ingredients are clearly separate, accurately scaled and realistically textured. Soft folded deep forest-green linen appears along the lower edge. Entire bowls visible, no overlap concealing ingredients. Camera overhead with a subtle natural angle, soft window light from upper left, delicate grounded shadows, tactile ceramic and linen, warm ivory/deep forest restrained palette. Premium editorial food photograph with natural imperfections, not a glossy 3D render. No text, logo, labels, people, rice, utensils or unrelated produce. One coherent photograph, not a collage; general category illustration, not documentary proof of specific inventory.
-
+The built-in image generator was used. Its interface did not expose a user-selectable model name, so this repository makes no unsupported model claim.
