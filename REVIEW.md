@@ -10,10 +10,11 @@ The five-page rice-first redesign is complete. It uses the campaign imagery and 
 - Keyboard-accessible mobile navigation, focus handling, native FAQs, reduced motion and no-JavaScript contact fallbacks.
 - Production indexing metadata, canonical URLs, structured company data, sitemap, robots file and a branded 404 page.
 - Fixed an inherited unclosed homepage wrapper and a validation error that could remain after switching from vending to grain.
+- Connected the dedicated desktop campaign images on Home, About and Products, and replaced internal image caveats with concise customer-facing copy.
 
 ## Validation — 15 September 2026
 
-- 1,730 HTML, asset, CSS, metadata and palette source checks passed across five pages.
+- 1,714 HTML, asset, CSS, metadata and palette source checks passed across five pages after the final copy and image-source refinement.
 - Eight enquiry unit tests passed.
 - Chromium checked every page at 320, 360, 390, 430, 768, 1024 and 1440 pixels: no horizontal overflow, broken images or JavaScript errors.
 - Axe WCAG A/AA automated scans at 390 and 1440 pixels reported no violations. This is an automated check, not a comprehensive compliance certification.
