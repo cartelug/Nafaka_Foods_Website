@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://cartelug.github.io/Nafaka_Foods_Website/sitemap.xml
