@@ -143,12 +143,14 @@ def footer(current: str) -> str:
 
 
 def quick_bar(wa_href: str, wa_label: str) -> str:
-    return f"""  <div class="quick-bar" data-surface="ivory">
+    # A complementary landmark, so its links are not loose outside the page's
+    # regions when a screen reader walks the document.
+    return f"""  <aside class="quick-bar" data-surface="ivory" aria-label="Quick contact">
     <a class="btn" href="{wa_href}" target="_blank" rel="noopener noreferrer">{wa_label} {ARROW}</a>
     <a class="btn btn--line btn--icon" href="tel:{PHONE_PRIMARY}" aria-label="Call Nafaka Foods on {PHONE_PRIMARY_DISPLAY}">
       <span aria-hidden="true">&#9742;</span>
     </a>
-  </div>"""
+  </aside>"""
 
 
 GATE = f"""  <div class="grain-gate" aria-hidden="true">

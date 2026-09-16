@@ -91,13 +91,35 @@ const walk = async page => {
         const wide = [...document.querySelectorAll('body *')]
           .filter(el => el.getBoundingClientRect().right > innerWidth + 1.5)
           .slice(0, 4).map(el => el.tagName + '.' + (el.className || '').toString().slice(0, 40));
+        // WCAG 2.2 AA (2.5.8) sets 24x24 as the floor for every control. Below
+        // the desktop breakpoint, where the pointer is a thumb, the site's own
+        // primary controls are held to the 44x44 the brief asks for.
+        const PRIMARY = '.btn, .brand, .link, .menu-link, .contact-method__value,' +
+          ' .measure-row, .rice-row, .close-panel__route, input, select, textarea, .menu-trigger';
+        const touch = innerWidth < 1024;
+        // A rule-thin link enlarges its target with an absolutely positioned
+        // ::before rather than by growing its own box, so the real pointer
+        // target is the union of the two.
+        const targetSize = el => {
+          const r = el.getBoundingClientRect();
+          const before = getComputedStyle(el, '::before');
+          const extra = before.content !== 'none' && before.position === 'absolute'
+            ? parseFloat(before.height) || 0
+            : 0;
+          return { w: r.width, h: Math.max(r.height, extra) };
+        };
         const small = [...document.querySelectorAll('a[href], button, summary, select, input, textarea')]
           .filter(el => {
-            const r = el.getBoundingClientRect();
-            return r.width > 0 && r.height > 0 && (r.height < 44 || r.width < 44)
-              && !el.closest('.chapters, .route-rail, .masthead__crumb, .footer-links, .field');
+            const t = targetSize(el);
+            if (t.w === 0 || t.h === 0) return false;
+            if (t.h < 24 || t.w < 24) return true;
+            return touch && el.closest(PRIMARY) !== null && t.h < 44;
           })
-          .slice(0, 4).map(el => `${el.tagName}:${(el.textContent || '').trim().slice(0, 22)}`);
+          .slice(0, 4).map(el => {
+            const t = targetSize(el);
+            return `${el.tagName}:${(el.textContent || '').trim().slice(0, 22)} ` +
+              `${Math.round(t.w)}x${Math.round(t.h)}`;
+          });
         return {
           overflow: document.documentElement.scrollWidth - innerWidth,
           wide,
@@ -142,7 +164,9 @@ const walk = async page => {
       const stuck = await page.evaluate(() => {
         for (const el of document.querySelectorAll('[data-reveal]')) {
           const r = el.getBoundingClientRect();
-          if (r.top < innerHeight && r.bottom > 0 && !el.classList.contains('is-in')) {
+          // The site releases at 92% of the viewport, so only flag elements
+          // comfortably inside it.
+          if (r.top < innerHeight * 0.88 && r.bottom > 0 && !el.classList.contains('is-in')) {
             return el.dataset.reveal + ' / ' + (el.className || el.tagName);
           }
         }
@@ -257,8 +281,8 @@ const walk = async page => {
     assert.ok(first.includes('skip-link'), `first tab stop is "${first}", expected the skip link`);
     await page.keyboard.press('Enter');
     await page.waitForTimeout(300);
-    assert.equal(await page.evaluate(() => document.activeElement.id || location.hash), '#main',
-      'skip link did not reach main');
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'main',
+      'skip link did not move focus to main');
     const ring = await page.evaluate(() => {
       const el = document.querySelector('.btn');
       el.focus();
@@ -316,19 +340,32 @@ const walk = async page => {
     await context.close();
   }
 
-  /* ---- 7. Zoom to 200% --------------------------------------------------- */
-  {
-    const context = await browser.newContext({ viewport: { width: 1280, height: 1024 }, deviceScaleFactor: 1 });
+  /* ---- 7. Zoom to 200% ---------------------------------------------------
+     Browser zoom halves the layout viewport and doubles the device pixel
+     ratio; setting CSS `zoom` instead would measure the scaled coordinate
+     space against an unscaled innerWidth and report overflow that is not
+     there. These are the real 200% layouts for 1280, 1366 and 1440. */
+  for (const [w, h] of [[640, 512], [683, 384], [720, 450]]) {
+    const context = await browser.newContext({
+      viewport: { width: w, height: h }, deviceScaleFactor: 2
+    });
     const page = await context.newPage();
-    wire(page, 'zoom200');
+    wire(page, `zoom200-${w * 2}`);
     for (const file of PAGES) {
       await page.goto(`${base}/${file}`, { waitUntil: 'load' });
-      await page.evaluate(() => { document.documentElement.style.zoom = '2'; });
-      await settle(page, 900);
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
-      if (overflow > 2) fail(`${file} @200% zoom: horizontal overflow ${overflow}px`);
+      await settle(page, 700);
+      await walk(page);
+      const state = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth - innerWidth,
+        wide: [...document.querySelectorAll('body *')]
+          .filter(el => el.getBoundingClientRect().right > innerWidth + 1.5)
+          .slice(0, 3).map(el => el.tagName + '.' + (el.className || '').toString().slice(0, 36))
+      }));
+      if (state.overflow > 1) {
+        fail(`${file} at 200% zoom of ${w * 2}px: overflow ${state.overflow}px ${state.wide}`);
+      }
     }
-    ok('200% zoom produced no horizontal overflow');
+    ok(`200% zoom of ${w * 2}px: no horizontal overflow`);
     await context.close();
   }
 
@@ -340,11 +377,17 @@ const walk = async page => {
       await page.goto(`${base}/${file}`, { waitUntil: 'load' });
       const state = await page.evaluate(() => {
         const gate = document.querySelector('.grain-gate');
+        // Anything genuinely hidden by the markup (a [hidden] panel, an empty
+        // error slot) is fine; what must not exist is content waiting on an
+        // animation that can never run.
         const hiddenText = [...document.querySelectorAll('h1, h2, p, a[href]')]
           .filter(el => {
+            if (el.closest('[hidden]')) return false;
+            if (el.classList.contains('field__error') || el.classList.contains('form-status')) return false;
             const cs = getComputedStyle(el);
-            return cs.opacity === '0' || cs.visibility === 'hidden' || cs.display === 'none';
-          }).length;
+            return cs.opacity === '0' || cs.visibility === 'hidden';
+          })
+          .map(el => el.tagName + '.' + (el.className || '').toString().slice(0, 30));
         return {
           gate: gate ? getComputedStyle(gate).display : 'none',
           h1: (document.querySelector('h1') || {}).textContent || '',
@@ -356,7 +399,9 @@ const walk = async page => {
       if (state.gate !== 'none') fail(`${file} without JS: preloader is covering the page`);
       if (!state.h1.trim()) fail(`${file} without JS: no visible h1`);
       if (state.links < 10) fail(`${file} without JS: navigation missing (${state.links} links)`);
-      if (state.hiddenText > 0) fail(`${file} without JS: ${state.hiddenText} elements hidden awaiting animation`);
+      if (state.hiddenText.length) {
+        fail(`${file} without JS: hidden awaiting animation — ${state.hiddenText.join(', ')}`);
+      }
     }
     // The menu must still open with <details> alone.
     await check('no-JS menu', async () => {
