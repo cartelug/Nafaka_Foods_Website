@@ -13,6 +13,7 @@ Edit this file, not the generated HTML.
 from __future__ import annotations
 
 import argparse
+import random
 import sys
 from pathlib import Path
 
@@ -42,8 +43,89 @@ NAV = [
     ("contact.html", "Contact"),
 ]
 
-ARROW = '<span class="btn__arrow" aria-hidden="true">&#8599;</span>'
-ARROW_DOWN = '<span class="btn__arrow" aria-hidden="true">&#8595;</span>'
+# =============================================================================
+# ICON SET
+# One sprite, drawn to the brand's hairline weight on a 24-unit grid. No emoji
+# anywhere: the telephone and the text arrows the site used before render as
+# colour emoji on iOS and Android and sit at the wrong weight beside Manrope.
+# =============================================================================
+ICON_SPRITE = """  <svg class="icon-sprite" aria-hidden="true" focusable="false" width="0" height="0">
+    <defs>
+      <symbol id="i-arrow-ne" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
+      <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+      <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24">
+        <path d="M8.4 4.5 10 8.2 8 10a12 12 0 0 0 6 6l1.8-2 3.7 1.6v3.1c0 .9-.8 1.6-1.7 1.5C10.6 21 3 13.4 2.6 6.2c0-.9.6-1.7 1.5-1.7Z"/>
+      </symbol>
+      <symbol id="i-whatsapp" viewBox="0 0 24 24">
+        <path d="M3.5 20.5 5 16.6A8.2 8.2 0 1 1 8 19.4Z"/>
+        <path d="M8.9 8.3c.3 0 .5 0 .7.4l.8 1.7-.7 1a5.6 5.6 0 0 0 2.9 2.9l1-.8 1.8.8c.3.1.4.3.4.6a2 2 0 0 1-2.8 1.5 8.6 8.6 0 0 1-4.6-4.6 2 2 0 0 1 .5-3.5Z"/>
+      </symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24">
+        <rect x="2.5" y="5" width="19" height="14" rx="1.2"/><path d="m3.4 6.2 8.6 6.6 8.6-6.6"/>
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 21.5C7.6 16.9 5.4 13.4 5.4 10a6.6 6.6 0 1 1 13.2 0c0 3.4-2.2 6.9-6.6 11.5Z"/>
+        <circle cx="12" cy="9.8" r="2.4"/>
+      </symbol>
+      <symbol id="i-grain" viewBox="0 0 24 24">
+        <path d="M12 21V8"/>
+        <path d="M12 8c0-3 2-5.5 5-6 .3 3.4-1.6 6-5 6ZM12 8C12 5 10 2.5 7 2c-.3 3.4 1.6 6 5 6Z"/>
+        <path d="M12 15c0-2.6 1.8-4.8 4.4-5.2.3 3-1.4 5.2-4.4 5.2ZM12 15c0-2.6-1.8-4.8-4.4-5.2-.3 3 1.4 5.2 4.4 5.2Z"/>
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12.5 5 5 10-11"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M5.5 5.5l13 13M18.5 5.5l-13 13"/></symbol>
+    </defs>
+  </svg>"""
+
+
+def icon(name: str, cls: str = "") -> str:
+    """An inline icon. Decorative by default — the link text carries meaning.
+
+    The viewBox is repeated on the outer <svg>: without it the element has no
+    intrinsic ratio and falls back to the SVG default box of 300x150 whenever a
+    percentage height cannot resolve."""
+    classes = f"icon {cls}".strip()
+    return (f'<svg class="{classes}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+            f'<use href="#i-{name}"/></svg>')
+
+
+# Which way an arrow leaves its box when it travels.
+TRAVEL_AXIS = {"arrow-ne": "ne", "arrow-down": "down", "arrow-up": "up", "arrow-right": "right"}
+
+
+def travel(name: str = "arrow-ne") -> str:
+    """Two stacked icons inside a clipped box: on hover one leaves along its own
+    axis while its replacement arrives from the opposite edge."""
+    axis = TRAVEL_AXIS.get(name, "ne")
+    return (f'<span class="travel travel--{axis}" aria-hidden="true">'
+            f'{icon(name, "travel__out")}{icon(name, "travel__in")}</span>')
+
+
+ARROW = travel('arrow-ne')
+ARROW_DOWN = travel('arrow-down')
+ARROW_UP = travel('arrow-up')
+
+def grain_field(count: int = 18, seed: int = 7) -> str:
+    """The hero's ambient layer: grains drifting down the frame, echoing the
+    stream falling into the pan. Per-grain values are inline because each one is
+    a unique instance, and they are generated from a fixed seed so the markup is
+    reproducible. The whole field is paused unless it is on screen."""
+    rng = random.Random(seed)
+    grains = "".join(
+        '<i style="left:{left}%;--d:{dur}s;--t:-{delay}s;--x:{drift}px;'
+        'transform:scale({scale})"></i>'.format(
+            left=round(rng.uniform(2, 97), 1),
+            dur=round(rng.uniform(11, 22), 1),
+            delay=round(rng.uniform(0, 20), 1),
+            drift=round(rng.uniform(-34, 34)),
+            scale=round(rng.uniform(.62, 1.25), 2),
+        )
+        for _ in range(count)
+    )
+    return f'<div class="grain-field" data-ambient aria-hidden="true">{grains}</div>'
+
 
 MARK_PATH = ('M28 24V9h23v12C64 5 91 9 91 36v28c0 17-10 27-27 27h-7V54c0-9-13-9-13 0v37h-9'
              'C18 91 9 79 9 63V28')
@@ -136,7 +218,7 @@ def footer(current: str) -> str:
       <div class="footer-bottom">
         <span>&copy; <span data-year>2026</span> Nafaka Foods Limited</span>
         <span>Uganda &middot; East Africa</span>
-        <a href="#main">Back to top &#8593;</a>
+        <a class="to-top" href="#main">Back to top {ARROW_UP}</a>
       </div>
     </div>
   </footer>"""
@@ -148,7 +230,7 @@ def quick_bar(wa_href: str, wa_label: str) -> str:
     return f"""  <aside class="quick-bar" data-surface="ivory" aria-label="Quick contact">
     <a class="btn" href="{wa_href}" target="_blank" rel="noopener noreferrer">{wa_label} {ARROW}</a>
     <a class="btn btn--line btn--icon" href="tel:{PHONE_PRIMARY}" aria-label="Call Nafaka Foods on {PHONE_PRIMARY_DISPLAY}">
-      <span aria-hidden="true">&#9742;</span>
+      {icon("phone", "icon--ring")}
     </a>
   </aside>"""
 
@@ -214,6 +296,7 @@ def page(*, path: str, head_html: str, body_class: str, nav_theme: str, current:
 {head_html}
 <body{body_attr} data-nav="{nav_theme}">
   <a class="skip-link" href="#main">Skip to content</a>
+{ICON_SPRITE}
   <div class="route-progress" data-scroll-progress aria-hidden="true"></div>
 {GATE}
 {header(current, cta_href, cta_label, cta_target)}
@@ -239,7 +322,7 @@ def station(index: str, eyebrow: str, title: str, note: str = "", surface_note: 
     return f"""<div class="station" data-reveal="draw">
           <p class="eyebrow"><span class="index">{index}</span>{eyebrow}</p>
           <div class="station__head{grid}">
-            <h2 class="station__title display-2" data-reveal="fall">{title}</h2>
+            <h2 class="station__title display-2" data-reveal="words">{title}</h2>
             {note_html}
           </div>
           {surface_note}
@@ -346,7 +429,7 @@ def home_main() -> str:
         f"""<a class="rice-row" href="products.html#{anchor}">
                 <span class="index">{index}</span>
                 <span class="rice-row__name">{name}</span>
-                <span class="rice-row__arrow" aria-hidden="true">&#8599;</span>
+                <span class="rice-row__arrow">{travel()}</span>
               </a>"""
         for index, name, anchor, _query, _body in RICE_TYPES
     )
@@ -374,6 +457,7 @@ def home_main() -> str:
         </picture>
       </div>
       <div class="hero__veil" aria-hidden="true"></div>
+      {grain_field()}
 
       <div class="shell hero__lede">
         <div class="hero__copy">
@@ -479,10 +563,10 @@ def home_main() -> str:
           routes to market for farmers and move quality food toward the people who need it.</p>
         <div class="origin__milestones" data-reveal-group="70">
           <div class="origin__milestone" data-reveal="settle">
-            <strong class="numeral">2016</strong><span>Operations began</span>
+            <strong class="numeral" data-count>2016</strong><span>Operations began</span>
           </div>
           <div class="origin__milestone" data-reveal="settle">
-            <strong class="numeral">2023</strong><span>Limited company</span>
+            <strong class="numeral" data-count>2023</strong><span>Limited company</span>
           </div>
           <div class="origin__milestone" data-reveal="settle">
             <strong class="numeral">EA</strong><span>Regional outlook</span>
@@ -564,7 +648,7 @@ VALUES = [
 def about_main() -> str:
     entries = "".join(
         f"""<article class="chronology__entry" data-reveal="advance">
-              <p class="chronology__year numeral">{year}</p>
+              <p class="chronology__year numeral" data-count>{year}</p>
               <h3 class="chronology__title display-3">{title}</h3>
               <p class="chronology__body">{body}</p>
             </article>"""
@@ -709,7 +793,7 @@ def products_main() -> str:
               <span class="index measure-row__index">{index}</span>
               <div><h3 class="measure-row__title display-3">{name}</h3></div>
               <p class="measure-row__body">{body}</p>
-              <span class="measure-row__arrow" aria-hidden="true">&#8599;</span>
+              <span class="measure-row__arrow">{travel()}</span>
             </a>"""
         for index, name, anchor, query, body in RICE_TYPES
     )
@@ -1003,19 +1087,19 @@ def contact_main() -> str:
           <p class="eyebrow">Reach the team</p>
           <div class="contact-methods mt-s">
             <div class="contact-method">
-              <span class="contact-method__label">Primary phone &amp; WhatsApp</span>
+              <span class="contact-method__label">{icon("whatsapp")}Primary phone &amp; WhatsApp</span>
               <a class="contact-method__value" href="tel:{PHONE_PRIMARY}">{PHONE_PRIMARY_DISPLAY}</a>
             </div>
             <div class="contact-method">
-              <span class="contact-method__label">Alternative phone</span>
+              <span class="contact-method__label">{icon("phone")}Alternative phone</span>
               <a class="contact-method__value" href="tel:{PHONE_ALT}">{PHONE_ALT_DISPLAY}</a>
             </div>
             <div class="contact-method">
-              <span class="contact-method__label">Email</span>
+              <span class="contact-method__label">{icon("mail")}Email</span>
               <a class="contact-method__value" href="mailto:{EMAIL}">{EMAIL}</a>
             </div>
             <div class="contact-method">
-              <span class="contact-method__label">Postal address</span>
+              <span class="contact-method__label">{icon("pin")}Postal address</span>
               <span class="contact-method__value">{POSTAL}</span>
             </div>
           </div>

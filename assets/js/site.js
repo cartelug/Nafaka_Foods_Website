@@ -215,6 +215,126 @@
   })();
 
   /* =========================================================================
+     WORD SPLITTING
+     Display headings arrive a word at a time. The split walks the existing
+     nodes so the editorial <em> survives — a naive innerHTML rewrite would
+     flatten it — and it runs before the reveal pass so the delays are in place
+     when the heading is released.
+     ========================================================================= */
+  (function splitWords() {
+    if (reduced) return;
+
+    const wrap = (node, counter) => {
+      const parts = node.textContent.split(/(\s+)/);
+      if (parts.length === 1 && !parts[0].trim()) return;
+      const frag = document.createDocumentFragment();
+      parts.forEach(part => {
+        if (!part) return;
+        if (!part.trim()) { frag.appendChild(document.createTextNode(part)); return; }
+        const outer = document.createElement('span');
+        outer.className = 'word';
+        const inner = document.createElement('span');
+        inner.textContent = part;
+        // Each word leaves a beat after the one before it.
+        inner.style.setProperty('--wd', Math.min(counter.n, 14) * 45 + 'ms');
+        counter.n += 1;
+        outer.appendChild(inner);
+        frag.appendChild(outer);
+      });
+      node.replaceWith(frag);
+    };
+
+    const walk = (el, counter) => {
+      Array.from(el.childNodes).forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) wrap(node, counter);
+        else if (node.nodeType === Node.ELEMENT_NODE && !node.classList.contains('word')) {
+          walk(node, counter);
+        }
+      });
+    };
+
+    $$('[data-reveal="words"]').forEach(el => walk(el, { n: 0 }));
+  })();
+
+  /* =========================================================================
+     COUNTERS
+     A figure rolls the last stretch up to its real value as it arrives, so the
+     number reads as settling rather than appearing. The element always holds
+     its final text, so a reader who never triggers it still sees the truth.
+     ========================================================================= */
+  (function counters() {
+    const items = $$('[data-count]').filter(el => /^\d+$/.test(el.textContent.trim()));
+    if (!items.length || reduced) return;
+
+    items.forEach(el => {
+      const target = Number(el.textContent.trim());
+      const from = Math.max(0, target - 24);
+      let raf = 0;
+      let done = false;
+
+      const roll = () => {
+        if (done) return;
+        done = true;
+        const start = performance.now();
+        const step = now => {
+          const t = clamp((now - start) / 900, 0, 1);
+          // Ease out so the last digits settle rather than snap.
+          const eased = 1 - Math.pow(1 - t, 3);
+          el.textContent = String(Math.round(from + (target - from) * eased));
+          if (t < 1) raf = requestAnimationFrame(step); else el.textContent = String(target);
+        };
+        raf = requestAnimationFrame(step);
+      };
+
+      el.dataset.countTarget = String(target);
+      el._roll = roll;
+      onTeardown(() => { if (raf) cancelAnimationFrame(raf); el.textContent = String(target); });
+    });
+
+    // Released on the same line as every other reveal.
+    const pending = items.slice();
+    const check = () => {
+      if (!pending.length) return;
+      const line = window.scrollY + window.innerHeight * 0.9;
+      for (let i = pending.length - 1; i >= 0; i -= 1) {
+        const el = pending[i];
+        if (el.getBoundingClientRect().top + window.scrollY < line) {
+          el._roll();
+          pending.splice(i, 1);
+        }
+      }
+    };
+    scrollEngine.onFrame(check);
+    check();
+  })();
+
+  /* =========================================================================
+     AMBIENT MOTION
+     Continuous motion is the one thing that can quietly cost battery all day,
+     so it only runs while its section is on screen. The CSS keeps every loop
+     behind .is-live; this decides when that class is there.
+     ========================================================================= */
+  (function ambient() {
+    if (reduced || !('IntersectionObserver' in window)) return;
+    const fields = $$('[data-ambient], .station');
+    if (!fields.length) return;
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => entry.target.classList.toggle('is-live', entry.isIntersecting));
+    }, { rootMargin: '10% 0px' });
+    fields.forEach(el => observer.observe(el));
+
+    // A backgrounded tab should not keep drifting grain.
+    const onVisibility = () => {
+      const hidden = document.visibilityState === 'hidden';
+      fields.forEach(el => { el.style.animationPlayState = hidden ? 'paused' : ''; });
+      document.documentElement.classList.toggle('is-idle', hidden);
+    };
+    listen(document, 'visibilitychange', onVisibility);
+    onTeardown(() => observer.disconnect());
+  })();
+
+  /* =========================================================================
      PARALLAX — capped, transform-only, pointer-and-width gated in CSS.
      ========================================================================= */
   (function parallax() {

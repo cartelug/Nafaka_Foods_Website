@@ -32,6 +32,35 @@
 </head>
 <body data-nav="dark">
   <a class="skip-link" href="#main">Skip to content</a>
+  <svg class="icon-sprite" aria-hidden="true" focusable="false" width="0" height="0">
+    <defs>
+      <symbol id="i-arrow-ne" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
+      <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+      <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24">
+        <path d="M8.4 4.5 10 8.2 8 10a12 12 0 0 0 6 6l1.8-2 3.7 1.6v3.1c0 .9-.8 1.6-1.7 1.5C10.6 21 3 13.4 2.6 6.2c0-.9.6-1.7 1.5-1.7Z"/>
+      </symbol>
+      <symbol id="i-whatsapp" viewBox="0 0 24 24">
+        <path d="M3.5 20.5 5 16.6A8.2 8.2 0 1 1 8 19.4Z"/>
+        <path d="M8.9 8.3c.3 0 .5 0 .7.4l.8 1.7-.7 1a5.6 5.6 0 0 0 2.9 2.9l1-.8 1.8.8c.3.1.4.3.4.6a2 2 0 0 1-2.8 1.5 8.6 8.6 0 0 1-4.6-4.6 2 2 0 0 1 .5-3.5Z"/>
+      </symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24">
+        <rect x="2.5" y="5" width="19" height="14" rx="1.2"/><path d="m3.4 6.2 8.6 6.6 8.6-6.6"/>
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 21.5C7.6 16.9 5.4 13.4 5.4 10a6.6 6.6 0 1 1 13.2 0c0 3.4-2.2 6.9-6.6 11.5Z"/>
+        <circle cx="12" cy="9.8" r="2.4"/>
+      </symbol>
+      <symbol id="i-grain" viewBox="0 0 24 24">
+        <path d="M12 21V8"/>
+        <path d="M12 8c0-3 2-5.5 5-6 .3 3.4-1.6 6-5 6ZM12 8C12 5 10 2.5 7 2c-.3 3.4 1.6 6 5 6Z"/>
+        <path d="M12 15c0-2.6 1.8-4.8 4.4-5.2.3 3-1.4 5.2-4.4 5.2ZM12 15c0-2.6-1.8-4.8-4.4-5.2-.3 3 1.4 5.2 4.4 5.2Z"/>
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12.5 5 5 10-11"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M5.5 5.5l13 13M18.5 5.5l-13 13"/></symbol>
+    </defs>
+  </svg>
   <div class="route-progress" data-scroll-progress aria-hidden="true"></div>
   <div class="grain-gate" aria-hidden="true">
     <div>
@@ -50,7 +79,7 @@
         <a class="nav-link" href="index.html">Home</a><a class="nav-link" href="about.html">Our story</a><a class="nav-link" href="products.html">Grain range</a><a class="nav-link" href="services.html">Smart vending</a><a class="nav-link" href="contact.html">Contact</a>
         <span class="nav-indicator" aria-hidden="true"></span>
       </nav>
-      <a class="btn nav-action" href="contact.html" data-magnetic>Plan your supply <span class="btn__arrow" aria-hidden="true">&#8599;</span></a>
+      <a class="btn nav-action" href="contact.html" data-magnetic>Plan your supply <span class="travel travel--ne" aria-hidden="true"><svg class="icon travel__out" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg><svg class="icon travel__in" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg></span></a>
       <details class="menu">
         <summary class="menu-trigger" aria-label="Open navigation" aria-expanded="false" aria-controls="menu-panel">
           <span class="menu-trigger__ticks" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -60,7 +89,7 @@
             <a class="menu-link" href="index.html"><span>Home</span><span class="menu-link__index" aria-hidden="true">01</span></a><a class="menu-link" href="about.html"><span>Our story</span><span class="menu-link__index" aria-hidden="true">02</span></a><a class="menu-link" href="products.html"><span>Grain range</span><span class="menu-link__index" aria-hidden="true">03</span></a><a class="menu-link" href="services.html"><span>Smart vending</span><span class="menu-link__index" aria-hidden="true">04</span></a><a class="menu-link" href="contact.html"><span>Contact</span><span class="menu-link__index" aria-hidden="true">05</span></a>
           </nav>
           <div class="menu-foot">
-            <a class="btn" href="https://wa.me/256776974521?text=Hello%20Nafaka%20Foods%2C%20I%20would%20like%20to%20make%20an%20enquiry." target="_blank" rel="noopener noreferrer">Start on WhatsApp <span class="btn__arrow" aria-hidden="true">&#8599;</span></a>
+            <a class="btn" href="https://wa.me/256776974521?text=Hello%20Nafaka%20Foods%2C%20I%20would%20like%20to%20make%20an%20enquiry." target="_blank" rel="noopener noreferrer">Start on WhatsApp <span class="travel travel--ne" aria-hidden="true"><svg class="icon travel__out" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg><svg class="icon travel__in" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg></span></a>
             <p class="menu-foot__note">Ugandan grain sourcing and distribution.<br>Building forward since 2016.</p>
           </div>
         </div>
@@ -77,13 +106,13 @@
           step away.</p>
         <div class="close-panel__routes lost__routes"><a class="close-panel__route" href="index.html">
               <span><strong>Return to the homepage</strong><small>Grain that moves life forward</small></span>
-              <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+              <span class="travel travel--ne" aria-hidden="true"><svg class="icon travel__out" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg><svg class="icon travel__in" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg></span>
             </a><a class="close-panel__route" href="products.html">
               <span><strong>Browse the grain range</strong><small>Rice first, with maize, beans and soya alongside</small></span>
-              <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+              <span class="travel travel--ne" aria-hidden="true"><svg class="icon travel__out" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg><svg class="icon travel__in" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg></span>
             </a><a class="close-panel__route" href="contact.html">
               <span><strong>Start an enquiry</strong><small>Tell us what needs to move</small></span>
-              <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+              <span class="travel travel--ne" aria-hidden="true"><svg class="icon travel__out" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg><svg class="icon travel__in" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg></span>
             </a></div>
       </div>
     </section>
@@ -114,14 +143,14 @@
       <div class="footer-bottom">
         <span>&copy; <span data-year>2026</span> Nafaka Foods Limited</span>
         <span>Uganda &middot; East Africa</span>
-        <a href="#main">Back to top &#8593;</a>
+        <a class="to-top" href="#main">Back to top <span class="travel travel--up" aria-hidden="true"><svg class="icon travel__out" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-up"/></svg><svg class="icon travel__in" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-up"/></svg></span></a>
       </div>
     </div>
   </footer>
   <aside class="quick-bar" data-surface="ivory" aria-label="Quick contact">
-    <a class="btn" href="https://wa.me/256776974521?text=Hello%20Nafaka%20Foods%2C%20I%20would%20like%20to%20make%20an%20enquiry." target="_blank" rel="noopener noreferrer">Enquire on WhatsApp <span class="btn__arrow" aria-hidden="true">&#8599;</span></a>
+    <a class="btn" href="https://wa.me/256776974521?text=Hello%20Nafaka%20Foods%2C%20I%20would%20like%20to%20make%20an%20enquiry." target="_blank" rel="noopener noreferrer">Enquire on WhatsApp <span class="travel travel--ne" aria-hidden="true"><svg class="icon travel__out" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg><svg class="icon travel__in" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-ne"/></svg></span></a>
     <a class="btn btn--line btn--icon" href="tel:+256776974521" aria-label="Call Nafaka Foods on +256 776 974 521">
-      <span aria-hidden="true">&#9742;</span>
+      <svg class="icon icon--ring" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-phone"/></svg>
     </a>
   </aside>
 </body>

@@ -302,6 +302,7 @@
     font-size:var(--t-eyebrow);font-weight:700;
     font-variant-numeric:tabular-nums;letter-spacing:.1em;
   }
+  .numeral[data-count]{font-variant-numeric:tabular-nums}
   .numeral{
     display:block;
     color:var(--accent);
@@ -378,6 +379,19 @@
     transform:scale(1.07);
     transition:transform var(--dur-cinema) var(--ease-image) var(--reveal-delay);
   }
+  /* Display headings arrive a word at a time, each one falling through its own
+     mask. The split is done by script; without it the heading is simply there. */
+  .js [data-reveal="words"] .word{
+    display:inline-block;overflow:hidden;vertical-align:bottom;
+    padding-bottom:.14em;margin-bottom:-.14em;
+  }
+  .js [data-reveal="words"] .word > span{
+    display:inline-block;
+    transform:translate3d(0,112%,0);
+    transition:transform var(--dur-reveal) var(--ease-image) var(--wd,0ms);
+  }
+  .js [data-reveal="words"].is-in .word > span{transform:none}
+
   /* The station rule draws along the route rather than fading in. Only the
      rule moves — scaling the block would distort the heading it carries. */
   .js [data-reveal="draw"]::before{
@@ -418,7 +432,8 @@
     }
     .js [data-reveal],
     .js [data-reveal] > img,
-    .js [data-reveal] > picture > img{
+    .js [data-reveal] > picture > img,
+    .js [data-reveal="words"] .word > span{
       opacity:1!important;clip-path:none!important;transform:none!important;
     }
     .parallax > img,.parallax > picture > img{transform:none!important}
@@ -1570,10 +1585,19 @@
     border-bottom:var(--hairline) solid var(--rule);
   }
   .contact-method__label{
-    display:block;margin-bottom:.35rem;
+    display:flex;align-items:center;gap:.5rem;
+    margin-bottom:.35rem;
     color:var(--accent);
     font-size:var(--t-meta);font-weight:700;letter-spacing:.12em;text-transform:uppercase;
   }
+  /* Fixed px, not 1em: the label is 10px uppercase and an icon that small
+     loses its drawing. */
+  .contact-method__label .icon{
+    width:15px;height:15px;
+    color:var(--accent-graphic);stroke-width:1.5;
+    transition:transform var(--dur-ui) var(--ease-ui);
+  }
+  .contact-method:hover .contact-method__label .icon{transform:translateY(-1px) scale(1.08)}
   .contact-method__value{
     display:flex;align-items:center;min-height:2.75rem;
     font-family:var(--font-display);font-size:clamp(1.25rem,2.4vw,1.6rem);line-height:1.3;
@@ -1633,4 +1657,163 @@
   }
   .mt-s{margin-top:var(--space-s)}
   .mt-m{margin-top:var(--space-m)}
+}
+
+/* ==========================================================================
+   ICONS
+   --------------------------------------------------------------------------
+   One sprite, drawn on a 24-unit grid at the same hairline weight as the rules.
+   This replaces the text arrows and the telephone character the site used
+   before: those render as colour emoji on iOS and Android and sit at the wrong
+   weight beside Manrope. Icons are decorative — the link text carries meaning.
+   ========================================================================== */
+@layer components {
+  .icon-sprite{position:absolute;width:0;height:0;overflow:hidden}
+
+  .icon{
+    width:1em;height:1em;flex:0 0 auto;
+    fill:none;stroke:currentColor;
+    stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+    vertical-align:-.125em;
+    overflow:visible;
+  }
+  .icon--lg{width:1.25em;height:1.25em}
+
+  /* ——— TRAVEL ————————————————————————————————————————————————————————
+     Two stacked copies in a clipped box. On hover the first leaves along its
+     own axis and the second arrives from the opposite edge, so the arrow reads
+     as departing rather than nudging. */
+  .travel{
+    position:relative;
+    /* stretch, not centre: a centred grid item leaves the block axis
+       indefinite, so the icons' height:100% would fall back to the SVG
+       default of 150px instead of filling the box. */
+    display:inline-grid;place-items:stretch;
+    width:1.05em;height:1.05em;flex:0 0 auto;
+    overflow:hidden;
+    vertical-align:-.16em;
+  }
+  .travel .icon{grid-area:1/1;width:100%;height:100%;vertical-align:baseline}
+  .travel__out,.travel__in{
+    transition:transform var(--dur-ui) var(--ease-ui),opacity var(--dur-micro) linear;
+  }
+  .travel--ne    .travel__in{transform:translate3d(-115%,115%,0)}
+  .travel--down  .travel__in{transform:translate3d(0,-130%,0)}
+  .travel--up    .travel__in{transform:translate3d(0,130%,0)}
+  .travel--right .travel__in{transform:translate3d(-130%,0,0)}
+  .travel__in{opacity:0}
+
+  /* The trigger is whichever control wraps the arrow. */
+  @media (hover:hover){
+    .btn:hover .travel--ne .travel__out,
+    .link:hover .travel--ne .travel__out,
+    a:hover > .travel--ne .travel__out,
+    a:hover .rice-row__arrow .travel__out,
+    a:hover .measure-row__arrow .travel__out{transform:translate3d(115%,-115%,0);opacity:0}
+    .btn:hover .travel--down .travel__out,
+    .link:hover .travel--down .travel__out{transform:translate3d(0,130%,0);opacity:0}
+    .btn:hover .travel--up .travel__out,
+    .link:hover .travel--up .travel__out,
+    .to-top:hover .travel--up .travel__out{transform:translate3d(0,-130%,0);opacity:0}
+
+    .btn:hover .travel__in,
+    .link:hover .travel__in,
+    a:hover > .travel .travel__in,
+    a:hover .rice-row__arrow .travel__in,
+    a:hover .measure-row__arrow .travel__in,
+    .to-top:hover .travel__in{transform:translate3d(0,0,0);opacity:1}
+  }
+  /* Keyboard users get the same signal. */
+  .btn:focus-visible .travel__out,
+  .link:focus-visible .travel__out{transform:translate3d(115%,-115%,0);opacity:0}
+  .btn:focus-visible .travel__in,
+  .link:focus-visible .travel__in{transform:translate3d(0,0,0);opacity:1}
+
+  /* ——— ICON DETAIL ————————————————————————————————————————————————— */
+
+  .icon--ring{transform-origin:70% 70%}
+  @media (hover:hover){
+    .btn--icon:hover .icon--ring{animation:icon-ring 620ms var(--ease-ui)}
+  }
+  @keyframes icon-ring{
+    0%,100%{transform:rotate(0)}
+    20%{transform:rotate(-13deg)}
+    40%{transform:rotate(10deg)}
+    60%{transform:rotate(-7deg)}
+    80%{transform:rotate(4deg)}
+  }
+
+  /* A grain, not a bullet: drawn in CSS so it stays crisp and needs no asset. */
+  .hero__meta li::before,
+  .route-rail__item::before{
+    width:.34rem;height:.62rem;
+    border-radius:60% 60% 55% 55%;
+    background:var(--accent-rule);
+    transform:rotate(-18deg);
+    transition:transform var(--dur-ui) var(--ease-ui);
+  }
+  .route-rail__item:hover::before{transform:rotate(-18deg) translateY(-2px) scale(1.15)}
+}
+
+/* ==========================================================================
+   AMBIENT MOTION
+   --------------------------------------------------------------------------
+   The only continuously running motion on the site. It is transform-and-opacity
+   only, it is paused whenever its section is off screen (JS adds .is-live), and
+   it stops completely under reduced motion. Its job is to keep the hero feeling
+   alive without asking the reader to look at it.
+   ========================================================================== */
+@layer motion {
+  .grain-field{
+    position:absolute;inset:0;z-index:var(--z-raise);
+    overflow:hidden;pointer-events:none;
+    opacity:0;
+    transition:opacity var(--dur-cinema) var(--ease-editorial);
+  }
+  .grain-field.is-live{opacity:1}
+  .grain-field i{
+    position:absolute;top:-6%;
+    width:3px;height:9px;
+    border-radius:60% 60% 55% 55%;
+    background:var(--brass);
+    opacity:0;
+    will-change:transform;
+  }
+  /* Nothing animates until the field is on screen. */
+  .grain-field.is-live i{animation:grain-drift var(--d,14s) linear var(--t,0s) infinite}
+
+  @keyframes grain-drift{
+    0%  {opacity:0;transform:translate3d(0,0,0) rotate(0deg)}
+    8%  {opacity:.5}
+    82% {opacity:.32}
+    100%{opacity:0;transform:translate3d(var(--x,10px),115vh,0) rotate(190deg)}
+  }
+
+  /* A slow highlight travelling the length of a station rule — the supply line
+     still carrying something long after it has drawn itself. */
+  .station::after{
+    position:absolute;inset:0 auto auto 0;
+    width:14%;height:var(--hairline);
+    background:linear-gradient(90deg,transparent,var(--accent-rule),transparent);
+    content:"";opacity:0;
+  }
+  .station{position:relative}
+  .station.is-live::after{animation:rule-travel 7s var(--ease-editorial) infinite}
+  @keyframes rule-travel{
+    0%  {opacity:0;transform:translateX(0)}
+    12% {opacity:.85}
+    70% {opacity:.85}
+    100%{opacity:0;transform:translateX(620%)}
+  }
+
+  /* A backgrounded tab keeps nothing running. */
+  .is-idle .grain-field i,
+  .is-idle .station::after{animation-play-state:paused}
+
+  @media (prefers-reduced-motion:reduce){
+    .grain-field{display:none!important}
+    .station::after{display:none!important}
+    .travel__out,.travel__in{transition:none!important}
+    .travel__in{opacity:0!important}
+  }
 }
