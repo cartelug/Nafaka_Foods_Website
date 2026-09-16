@@ -283,13 +283,27 @@ const walk = async page => {
     await page.waitForTimeout(300);
     assert.equal(await page.evaluate(() => document.activeElement.id), 'main',
       'skip link did not move focus to main');
+    // The header CTA is display:none below 60em and the menu's button sits in a
+    // closed <details>, where offsetParent still reports a box. checkVisibility
+    // accounts for content-visibility, so this lands on a button the reader can
+    // actually reach.
     const ring = await page.evaluate(() => {
-      const el = document.querySelector('.btn');
+      const reachable = b => (b.checkVisibility
+        ? b.checkVisibility({ checkVisibilityCSS: true, contentVisibilityAuto: true })
+        : b.offsetParent !== null) && b.getBoundingClientRect().width > 0;
+      const el = [...document.querySelectorAll('.btn')].find(reachable);
+      if (!el) return { style: 'none', label: 'no visible button' };
       el.focus();
       const cs = getComputedStyle(el);
-      return { width: cs.outlineWidth, style: cs.outlineStyle };
+      return {
+        style: cs.outlineStyle,
+        width: cs.outlineWidth,
+        shadow: cs.boxShadow,
+        label: (el.textContent || '').trim().slice(0, 24)
+      };
     });
-    assert.notEqual(ring.style, 'none', 'focus ring missing on buttons');
+    assert.notEqual(ring.style, 'none', `focus ring missing on "${ring.label}"`);
+    assert.notEqual(ring.shadow, 'none', `focus ring's second tone missing on "${ring.label}"`);
     });
 
     /* ---- 5. Internal links all resolve ----------------------------------- */
