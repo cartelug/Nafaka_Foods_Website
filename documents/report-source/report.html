@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="en-UG">
+<head>
+<meta charset="utf-8">
+<title>Nafaka Foods — Website Report &amp; Forward Plan</title>
+<style>
+@font-face{font-family:Manrope;src:url("../../assets/fonts/manrope-400.woff2") format("woff2");font-weight:400;font-style:normal}
+@font-face{font-family:Manrope;src:url("../../assets/fonts/manrope-500.woff2") format("woff2");font-weight:500;font-style:normal}
+@font-face{font-family:Manrope;src:url("../../assets/fonts/manrope-600.woff2") format("woff2");font-weight:600;font-style:normal}
+@font-face{font-family:Manrope;src:url("../../assets/fonts/manrope-700.woff2") format("woff2");font-weight:700;font-style:normal}
+@font-face{font-family:Newsreader;src:url("../../assets/fonts/newsreader-400.woff2") format("woff2");font-weight:400;font-style:normal}
+@font-face{font-family:Newsreader;src:url("../../assets/fonts/newsreader-500.woff2") format("woff2");font-weight:500;font-style:normal}
+@font-face{font-family:Newsreader;src:url("../../assets/fonts/newsreader-400-italic.woff2") format("woff2");font-weight:400;font-style:italic}
+
+:root{
+  --forest-950:#071b12; --forest-900:#0a291d; --forest-800:#123827;
+  --leaf:#5c8b46; --leaf-deep:#3d6630; --brass:#b58a45; --brass-lit:#d8b877;
+  --ivory:#fffdf8; --rice:#f6f0e3; --sand:#e8dec9;
+  --ink:#17241b; --ink-dim:#4d574f; --pale:#b2c0b3;
+  --rule:rgba(23,36,27,.16); --rule-strong:rgba(23,36,27,.34);
+  --display:Newsreader,Georgia,serif; --sans:Manrope,Arial,sans-serif;
+}
+@page{ size:A4; margin:17mm 16mm 18mm; }
+@page:first{ margin:0; }
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans); font-size:9.3pt; line-height:1.62;
+  color:var(--ink); background:var(--ivory);
+  -webkit-print-color-adjust:exact; print-color-adjust:exact;
+}
+h1,h2,h3,h4,p,ul,ol,table,figure{margin:0}
+em{font-family:var(--display);font-style:italic}
+
+/* ---------- page mechanics ---------- */
+.page{ page-break-after:always; break-after:page; }
+.page:last-child{ page-break-after:auto; break-after:auto; }
+
+/* ---------- cover ---------- */
+.cover{
+  position:relative; width:210mm; height:297mm;
+  background:var(--forest-950); color:var(--rice);
+  padding:26mm 20mm 18mm; display:flex; flex-direction:column;
+}
+.cover__mark{width:17mm;height:17mm}
+.cover__eyebrow{
+  margin-top:auto; color:var(--brass-lit);
+  font-size:7.6pt; font-weight:700; letter-spacing:.2em; text-transform:uppercase;
+  display:flex; align-items:center; gap:3mm;
+}
+.cover__eyebrow::before{content:"";width:11mm;height:1px;background:currentColor}
+.cover__title{
+  margin-top:5mm; font-family:var(--display); font-weight:400;
+  font-size:40pt; line-height:1.0; letter-spacing:-.03em; max-width:150mm;
+}
+.cover__title em{color:var(--brass-lit)}
+.cover__lead{
+  margin-top:7mm; max-width:120mm; color:var(--pale);
+  font-size:10.5pt; line-height:1.6;
+}
+.cover__meta{
+  margin-top:14mm; padding-top:5mm; border-top:1px solid rgba(246,240,227,.22);
+  display:grid; grid-template-columns:repeat(2,1fr); gap:5mm 8mm;
+}
+.cover__meta div span{
+  display:block; color:var(--brass-lit);
+  font-size:6.6pt; font-weight:700; letter-spacing:.15em; text-transform:uppercase;
+}
+.cover__meta div strong{
+  display:block; margin-top:1.5mm; font-weight:500; font-size:9.4pt;
+  color:var(--rice); word-break:break-all;
+}
+
+/* ---------- station heading ---------- */
+.station{ padding-top:3mm; border-top:1px solid var(--rule-strong); margin-bottom:6mm; }
+.station__eyebrow{
+  display:flex; align-items:center; gap:3mm; color:var(--leaf-deep);
+  font-size:7.2pt; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+}
+.station__eyebrow b{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+.station__eyebrow::before{content:"";width:9mm;height:1px;background:currentColor}
+.station__title{
+  margin-top:3mm; font-family:var(--display); font-weight:400;
+  font-size:23pt; line-height:1.06; letter-spacing:-.025em; max-width:135mm;
+}
+.station__title em{color:var(--leaf-deep)}
+
+h3{
+  font-family:var(--display); font-weight:400; font-size:13pt;
+  line-height:1.15; letter-spacing:-.015em; margin:6mm 0 2mm;
+}
+h4{
+  font-size:7.4pt; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--leaf-deep); margin:5mm 0 2mm;
+}
+p{ max-width:165mm; text-wrap:pretty; }
+p + p{margin-top:2.6mm}
+.dim{color:var(--ink-dim)}
+.lead{font-size:10.5pt;line-height:1.6;color:var(--ink-dim);max-width:150mm}
+
+/* ---------- measure list ---------- */
+.rows{border-top:1px solid var(--rule);margin-top:4mm}
+.row{
+  display:grid; grid-template-columns:11mm 42mm 1fr; gap:4mm;
+  padding:3mm 0; border-bottom:1px solid var(--rule);
+  break-inside:avoid;
+}
+.row__i{color:var(--leaf-deep);font-size:7.4pt;font-weight:700;font-variant-numeric:tabular-nums}
+.row__k{font-family:var(--display);font-size:11.5pt;line-height:1.2}
+.row__v{color:var(--ink-dim);font-size:8.8pt;line-height:1.55}
+.row--wide{grid-template-columns:11mm 1fr}
+
+/* ---------- data table ---------- */
+table{width:100%;border-collapse:collapse;margin-top:4mm;font-size:8.7pt}
+th{
+  text-align:left; padding:2.4mm 3mm 2.4mm 0;
+  border-bottom:1px solid var(--rule-strong);
+  font-size:6.9pt; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--leaf-deep); white-space:nowrap;
+}
+td{padding:2.4mm 3mm 2.4mm 0;border-bottom:1px solid var(--rule);vertical-align:top;line-height:1.5}
+td:first-child{font-weight:600;white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+tr{break-inside:avoid}
+
+/* ---------- panels ---------- */
+.panel{
+  margin-top:5mm; padding:5mm 6mm; background:var(--rice);
+  border-left:2px solid var(--brass); break-inside:avoid;
+}
+.panel--deep{background:var(--forest-950);color:var(--rice);border-left-color:var(--brass-lit)}
+.panel--deep .dim{color:var(--pale)}
+.panel h4{margin-top:0;color:var(--leaf-deep)}
+.panel--deep h4{color:var(--brass-lit)}
+
+.flags{margin-top:4mm;border-top:1px solid var(--rule)}
+.flag{
+  display:grid;grid-template-columns:1fr 26mm;gap:4mm;
+  padding:2.6mm 0;border-bottom:1px solid var(--rule);break-inside:avoid;
+}
+.flag b{font-weight:600}
+.flag span{
+  text-align:right;font-size:7.2pt;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--leaf-deep);white-space:nowrap;
+}
+
+ul{padding-left:0;list-style:none}
+li{position:relative;padding-left:5mm;margin-top:1.8mm;max-width:165mm}
+li::before{
+  position:absolute;left:0;top:.62em;width:1.6mm;height:1.6mm;
+  background:var(--brass);content:"";
+}
+
+/* ---------- figures ---------- */
+.shots{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin-top:5mm}
+.shot{break-inside:avoid}
+.shot img{width:100%;display:block;border:1px solid var(--rule)}
+.shot figcaption{
+  margin-top:2mm;color:var(--ink-dim);
+  font-size:6.9pt;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+}
+.phones{display:grid;grid-template-columns:1fr 1fr;gap:6mm;margin-top:6mm}
+.shot--lead img{height:100mm;object-fit:cover;object-position:top}
+.phones .shot img{border:1px solid var(--rule)}
+
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="page cover">
+  <svg class="cover__mark" viewBox="-2 -2 104 104" fill="none">
+    <path d="M28 24V9h23v12C64 5 91 9 91 36v28c0 17-10 27-27 27h-7V54c0-9-13-9-13 0v37h-9C18 91 9 79 9 63V28"
+          stroke="#f6f0e3" stroke-width="5.5" stroke-linejoin="round"/>
+    <path d="M10 38C-1 32 0 21 0 17c13 0 23 8 23 21-5 1-9 1-13 0ZM23 38c1-14 11-22 22-23 0 14-7 24-22 25ZM11 57C1 51 0 43 0 39c12 0 22 7 23 19-5 1-8 1-12-1ZM23 57c2-13 11-20 22-21 0 12-7 23-22 23Z"
+          fill="#5c8b46"/>
+  </svg>
+
+  <p class="cover__eyebrow">Creative development &middot; Delivery report</p>
+  <h1 class="cover__title">Grain that moves <em>life forward.</em></h1>
+  <p class="cover__lead">A full art-direction, motion, responsive-engineering and production pass
+    over the Nafaka Foods website — what was built, what was verified, and what comes next.</p>
+
+  <div class="cover__meta">
+    <div><span>Prepared for</span><strong>Nafaka Foods Limited</strong></div>
+    <div><span>Date</span><strong>16 September 2026</strong></div>
+    <div><span>Live website</span><strong>cartelug.github.io/Nafaka_Foods_Website/</strong></div>
+    <div><span>Release commit</span><strong>f58cced</strong></div>
+  </div>
+</section>
+
+<!-- ============ 01 SUMMARY ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>01</b>What was delivered</p>
+    <h2 class="station__title">A rebuild around <em>one idea.</em></h2>
+  </div>
+
+  <p class="lead">The company&rsquo;s positioning, facts, contact details, WhatsApp enquiry logic,
+    page addresses and approved photography are unchanged. Everything around them was rebuilt:
+    the art direction, the layout system, the motion, the accessibility and the production code.</p>
+
+  <div class="rows">
+    <div class="row"><span class="row__i">01</span><span class="row__k">Art direction</span>
+      <span class="row__v">A single concept — grain in motion — expressed through composition,
+      rule-work and timing rather than added effects. Six tonal surfaces give each page a distinct
+      character inside one system.</span></div>
+    <div class="row"><span class="row__i">02</span><span class="row__k">Responsive build</span>
+      <span class="row__v">Mobile and desktop are separate compositions, not one stacked layout.
+      Verified at twenty-one widths from 320px to 1920px, including the intermediate sizes between
+      named devices.</span></div>
+    <div class="row"><span class="row__i">03</span><span class="row__k">Motion system</span>
+      <span class="row__v">Four movement verbs on one timing scale, plus a branded preloader with
+      four independent fail-safes. No animation library.</span></div>
+    <div class="row"><span class="row__i">04</span><span class="row__k">Accessibility</span>
+      <span class="row__v">Zero automated WCAG 2.0 / 2.1 A and AA violations across all six pages,
+      a designed reduced-motion mode, and a document that works with JavaScript switched off.</span></div>
+    <div class="row"><span class="row__i">05</span><span class="row__k">Engineering</span>
+      <span class="row__v">No frameworks or dependencies. One stylesheet, two small scripts, a
+      single animation loop, and a page generator so the shared chrome is written once.</span></div>
+  </div>
+
+  <div class="panel">
+    <h4>The commercial job the site has to do</h4>
+    <p class="dim">Rice leads. Every rice variety on the range page opens a WhatsApp enquiry with
+      that variety already selected. Grain supply and smart vending are named as two separate routes
+      before the contact form, and the form adapts to whichever the visitor picks — asking for a
+      quantity for grain, and for building context for vending.</p>
+  </div>
+
+  <h3>Release</h3>
+  <table>
+    <tr><td>Live website</td><td>https://cartelug.github.io/Nafaka_Foods_Website/</td></tr>
+    <tr><td>Repository</td><td>cartelug/Nafaka_Foods_Website</td></tr>
+    <tr><td>Release commit</td><td>f58ccedada1470f10ffa7c9e75136464a77c52ee</td></tr>
+    <tr><td>Deployed</td><td>16 September 2026 — GitHub Pages build and deployment, succeeded</td></tr>
+    <tr><td>Pages</td><td>Home, Our story, Grain range, Smart vending, Contact, plus a 404 page</td></tr>
+  </table>
+</section>
+
+<!-- ============ 02 CONCEPT ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>02</b>The creative concept</p>
+    <h2 class="station__title">Grain in <em>motion.</em></h2>
+  </div>
+
+  <p class="lead">The approved hero photograph already contained the idea: a specialist letting rice
+    fall into a brass sampling pan. The whole interface is built from that one gesture, so the design
+    belongs to Nafaka rather than being decoration applied afterwards.</p>
+
+  <div class="rows">
+    <div class="row"><span class="row__i">&mdash;</span><span class="row__k">The route rule</span>
+      <span class="row__v">Every section opens with a hairline that draws from left to right,
+      carrying a number and a label. The rule is the supply route; the sections are stations on
+      it. This is what gives the site its rhythm.</span></div>
+    <div class="row"><span class="row__i">&mdash;</span><span class="row__k">The fall</span>
+      <span class="row__v">Headlines arrive downward through a mask, the way grain drops into the
+      pan — never a generic fade. The preloader clears downward and the headline falls in the same
+      direction, so the movement is handed over rather than cut.</span></div>
+    <div class="row"><span class="row__i">&mdash;</span><span class="row__k">Measure ticks</span>
+      <span class="row__v">Buyers, rice varieties, commodities and metadata sit on fine rules with
+      lined-up numerals, like a sorting register — in place of rows of repeated cards.</span></div>
+    <div class="row"><span class="row__i">&mdash;</span><span class="row__k">The aperture</span>
+      <span class="row__v">Photographs open from a clip and settle back to full size, rather than
+      fading in.</span></div>
+  </div>
+
+  <h3>The tonal journey</h3>
+  <p class="dim">Sections are paced deliberately instead of being uniformly coloured, so the page has
+    light and shade as a reader moves down it.</p>
+  <table>
+    <tr><td>Opening</td><td>Bright and assured — the hero and the brand statement on ivory and rice white</td></tr>
+    <tr><td>The range</td><td>Deep forest green, with brass numerals for the rice varieties</td></tr>
+    <tr><td>Who we supply</td><td>Back to ivory, as a ruled register of buyers</td></tr>
+    <tr><td>Origin story</td><td>The deepest surface, with the Kabale narrative and the milestone figures</td></tr>
+    <tr><td>Smart vending</td><td>Brass-lit, with a tighter and more mechanical cadence</td></tr>
+    <tr><td>Closing</td><td>Warm rice white, with three named routes into an enquiry</td></tr>
+  </table>
+
+  <div class="panel">
+    <h4>What was deliberately avoided</h4>
+    <p class="dim">Centred headings above three identical cards, endless rounded rectangles,
+      gradient blobs, neon glows, floating badges, decorative icon libraries, marquees that run for
+      their own sake, fake loading counters, cursor gimmicks, and sections added only to make the
+      page longer. Where the previous build used an endlessly scrolling banner of commodity names,
+      the same names are now real links into the range — navigation rather than ornament.</p>
+  </div>
+</section>
+
+<!-- ============ 03 SYSTEM ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>03</b>The design system</p>
+    <h2 class="station__title">One system, <em>six surfaces.</em></h2>
+  </div>
+
+  <p class="lead">Each section declares which surface it sits on. That single declaration resolves the
+    background, the text colour, the quiet text, the accent, the rules and the focus ring for
+    everything inside it — which is why the pages look varied without the code becoming a pile of
+    exceptions.</p>
+
+  <h3>Colour</h3>
+  <p class="dim">Sampled from the approved photography: the forest workwear, the brass sampling pan,
+    the cream lime-washed wall, the milled rice.</p>
+  <table>
+    <tr><td>Deep forest</td><td class="num">#071B12 / #0A291D / #123827</td><td>Range, origin story and vending surfaces</td></tr>
+    <tr><td>Rice &amp; ivory</td><td class="num">#FFFDF8 / #F6F0E3 / #E8DEC9</td><td>Opening, register and closing surfaces</td></tr>
+    <tr><td>Botanical green</td><td class="num">#5C8B46 / #3D6630</td><td>Graphic marks, and a darker tone for small text</td></tr>
+    <tr><td>Brass</td><td class="num">#B58A45 / #D8B877</td><td>Rules and numerals; the lighter tone for text on dark</td></tr>
+    <tr><td>Ink</td><td class="num">#17241B / #4D574F</td><td>Body text and quiet text on light surfaces</td></tr>
+  </table>
+  <p class="dim" style="margin-top:3mm">Two greens exist on purpose. The lighter one is used for
+    graphics; a darker one is used for small text, because the lighter green cannot carry the
+    required 4.5:1 contrast at label sizes.</p>
+
+  <h3>Typography</h3>
+  <p class="dim">Newsreader for display and editorial emphasis, Manrope for interface and body text.
+    Both are self-hosted, so no third party is involved in rendering the page. Thirteen registers run
+    from the hero headline down to metadata, all scaling fluidly rather than stepping at breakpoints.
+    Italic is reserved for editorial emphasis inside display type and is used nowhere else.</p>
+
+  <h3>Layout</h3>
+  <p class="dim">One container, expressed as padding rather than a fixed width, so full-bleed strips
+    can align their first item to exactly the same line as the rest of the page. Compositions reflow
+    at three shared points: where lists become columns, where full-width text splits in two, and
+    where a photograph may sit in a column beside type.</p>
+
+  <div class="panel">
+    <h4>Why the 900–1023px band matters</h4>
+    <p class="dim">A wide photograph placed in a narrow column crops the subject into a near-square
+      and cuts the very thing the picture is about. Image-beside-text compositions therefore require
+      a genuine landscape frame before they engage. Below that, the layout keeps its stacked form —
+      which is why a large tablet shows the whole photograph rather than a tight crop of it.</p>
+  </div>
+</section>
+
+<!-- ============ 04 MOTION ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>04</b>Motion</p>
+    <h2 class="station__title">Four verbs, <em>one grammar.</em></h2>
+  </div>
+
+  <p class="lead">Movement carries meaning here rather than being applied for its own sake. Each
+    verb has a fixed job, so a reader learns the language of the site without noticing. Nothing
+    animates outside these.</p>
+
+  <table>
+    <th>Verb</th><th>Meaning</th><th>Used on</th>
+    <tr><td>Fall</td><td>Arrives downward through a mask</td><td>Display type and headlines</td></tr>
+    <tr><td>Advance</td><td>Enters from the left, along the direction of supply</td><td>Lists, rows and links</td></tr>
+    <tr><td>Open</td><td>An aperture lifts and the image settles back</td><td>Photography</td></tr>
+    <tr><td>Settle</td><td>Resolves in place; carries the stagger</td><td>Metadata and supporting copy</td></tr>
+    <tr><td>Draw</td><td>The route rule extends left to right</td><td>Section rules only</td></tr>
+  </table>
+
+  <h4>Timing</h4>
+  <table>
+    <tr><td class="num">170ms</td><td>Pointer feedback — nothing spatial</td></tr>
+    <tr><td class="num">340ms</td><td>A state change the visitor asked for</td></tr>
+    <tr><td class="num">760ms</td><td>Content arriving as the page is read</td></tr>
+    <tr><td class="num">1150ms</td><td>Page-scale choreography</td></tr>
+  </table>
+  <p class="dim" style="margin-top:3mm">Some things are deliberately still — body copy in the
+    first screen, the navigation, every form field. That contrast is what makes the movement read.</p>
+
+  <h3>The preloader</h3>
+  <p class="dim">A single brass grain travels in, settles into the Nafaka mark, and the mark draws
+    itself. The gate then clears downward, uncovering the navigation first while the headline falls
+    in the same direction — about 1.7 seconds, once per visit, and never for a visitor who has asked
+    for reduced motion.</p>
+
+  <div class="panel--deep panel">
+    <h4>Four independent fail-safes</h4>
+    <p class="dim">A preloader that can trap a page is worse than none, so four separate mechanisms
+      can each end it independently:</p>
+    <ul style="margin-top:3mm">
+      <li class="dim">If JavaScript does not run, the preloader never appears at all — it is not in
+        the page&rsquo;s critical path.</li>
+      <li class="dim">A stylesheet rule clears it at 2.4 seconds even if the main script never loads.</li>
+      <li class="dim">The script enforces a hard 1.8-second ceiling regardless of the network.</li>
+      <li class="dim">A small start-up script releases every hidden state at 3 seconds if the main
+        script never arrives.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 05 PAGES ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>05</b>The pages</p>
+    <h2 class="station__title">Five pages, <em>one voice.</em></h2>
+  </div>
+
+  <div class="rows">
+    <div class="row row--wide"><span class="row__i">01</span>
+      <div><span class="row__k">Home</span>
+        <p class="row__v" style="margin-top:1.5mm">Two separate hero compositions. On a phone: the
+        headline, then the whole photograph inside the first screen, then the supporting copy and
+        actions. On a laptop: the photograph framed below the navigation, with the type set on the
+        lime-washed wall the photographer left empty and held to 44% of the width so no letterform
+        ever crosses the subject. Below it, the commodity register, the brand statement, the rice
+        range, a ruled index of buyers, the origin split, the vending hand-off and a closing panel
+        with three named routes.</p></div></div>
+
+    <div class="row row--wide"><span class="row__i">02</span>
+      <div><span class="row__k">Our story</span>
+        <p class="row__v" style="margin-top:1.5mm">A documentary chronology rather than a corporate
+        timeline: the year is the anchor and each entry advances from the route line. Purpose,
+        direction and values sit on the same register system. No milestones were invented — the
+        page carries 2016, 2023 and a forward-looking entry, and nothing else.</p></div></div>
+
+    <div class="row row--wide"><span class="row__i">03</span>
+      <div><span class="row__k">Grain range</span>
+        <p class="row__v" style="margin-top:1.5mm">Rice leads. Each variety is a full-width row that
+        opens an enquiry with that variety already selected. Maize, beans and soya form a ruled
+        three-name register rather than coloured cards, and the wider scope sits in a separate
+        note. No technical specifications, grades or pack sizes were invented; the page says these
+        are confirmed by the team.</p></div></div>
+
+    <div class="row row--wide"><span class="row__i">04</span>
+      <div><span class="row__k">Smart vending</span>
+        <p class="row__v" style="margin-top:1.5mm">A tighter, more mechanical cadence: tabular spec
+        columns, a five-step placement sequence, squarer rules. Distinct from the grain pages while
+        staying recognisably Nafaka. The upright vending photograph now runs in an upright frame, so
+        the machine, the contactless reader and the person all stay inside the crop.</p></div></div>
+
+    <div class="row row--wide"><span class="row__i">05</span>
+      <div><span class="row__k">Contact</span>
+        <p class="row__v" style="margin-top:1.5mm">Two routes — grain supply and smart vending — are
+        named before the form, and either one sets the form in place. Inline validation with messages
+        that never rely on colour alone, visible focus, a live status message, and the WhatsApp draft
+        shown in full for review before anything opens. Nothing is ever sent automatically.</p></div></div>
+  </div>
+
+  <div class="panel">
+    <h4>Nothing hidden behind a hover</h4>
+    <p class="dim">Every interaction has a touch equivalent. There is no information anywhere on this
+      site that can only be reached with a mouse, and the mobile menu is built on a native browser
+      control so it opens even with JavaScript switched off.</p>
+  </div>
+</section>
+
+<!-- ============ 06 SCREENS ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>06</b>How it looks</p>
+    <h2 class="station__title">The first <em>ten seconds.</em></h2>
+  </div>
+
+  <p class="lead">The phone screen was treated as the highest-priority surface, on the assumption
+    that a buyer most often opens the link from a WhatsApp message. So it is its own composition
+    rather than the desktop one stacked — and the whole photograph lands inside the first screen.</p>
+
+  <div class="phones">
+    <figure class="shot"><img src="img/02-home-mobile.jpg" alt="Homepage on a phone">
+      <figcaption>Home &middot; 390&times;844</figcaption></figure>
+    <figure class="shot"><img src="img/07-mobile-menu.jpg" alt="The mobile navigation menu open">
+      <figcaption>Navigation &middot; full-screen panel</figcaption></figure>
+  </div>
+</section>
+
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>07</b>The pages on a laptop</p>
+    <h2 class="station__title">Distinct, but clearly <em>one family.</em></h2>
+  </div>
+
+  <figure class="shot shot--lead" style="margin-bottom:5mm">
+    <img src="img/01-home-desktop.jpg" alt="Homepage on a laptop">
+    <figcaption>Home &middot; 1440&times;900</figcaption>
+  </figure>
+
+  <div class="shots" style="margin-top:0">
+    <figure class="shot"><img src="img/03-grain-range.jpg" alt="The grain range page">
+      <figcaption>Grain range</figcaption></figure>
+    <figure class="shot"><img src="img/04-smart-vending.jpg" alt="The smart vending page">
+      <figcaption>Smart vending</figcaption></figure>
+    <figure class="shot"><img src="img/05-our-story.jpg" alt="The our story page">
+      <figcaption>Our story</figcaption></figure>
+    <figure class="shot"><img src="img/06-contact.jpg" alt="The contact page">
+      <figcaption>Contact</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ 07 IMAGERY ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>08</b>Photography</p>
+    <h2 class="station__title">Every image kept <em>its role.</em></h2>
+  </div>
+
+  <p class="lead">No photograph was replaced, generated, recoloured or moved to a different subject.
+    Each one is still used in exactly the role it already held, and an automated check now fails the
+    build if a role moves between pages.</p>
+
+  <table>
+    <th>Image</th><th>Role</th>
+    <tr><td>Rice hero</td><td>Homepage hero — separate desktop and upright mobile compositions</td></tr>
+    <tr><td>Four rice bowls</td><td>Homepage range stage and the Grain range masthead</td></tr>
+    <tr><td>Kitchen buyer</td><td>Homepage origin story</td></tr>
+    <tr><td>Vending machine</td><td>Homepage vending band, and the Smart vending masthead</td></tr>
+  </table>
+
+  <h3>How presentation was improved</h3>
+  <p class="dim">Only through art direction: the existing desktop and mobile variants, controlled
+    crops, fixed aspect frames so nothing shifts while loading, aperture reveals, parallax capped at
+    a very small distance, and two soft tonal veils placed so the headline stays legible over the
+    photograph without washing out the light the photographer captured.</p>
+
+  <p class="dim" style="margin-top:3mm">One deliberate change: the Smart vending page now serves the
+    upright vending composition at every width, because that page&rsquo;s picture column is an
+    upright frame. It is the same approved photograph in the variant prepared for that shape — and
+    the result is that the machine, the reader and the person all stay in the crop, where previously
+    the person was cut off.</p>
+
+  <div class="panel">
+    <h4>Please note</h4>
+    <p class="dim">The campaign imagery is illustrative brand photography. It is not documentary
+      evidence of Nafaka staff, customers, facilities, stock or certifications, and the website does
+      not present it as such. This is recorded in the repository alongside the images.</p>
+  </div>
+</section>
+
+<!-- ============ 08 ACCESSIBILITY ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>09</b>Accessibility</p>
+    <h2 class="station__title">Part of the design, <em>not a patch.</em></h2>
+  </div>
+
+  <p class="lead">A Ugandan grain business selling to schools, health facilities and government
+    institutions should have a website those institutions can actually use. Accessibility was treated
+    as a quality of the design rather than a checklist applied at the end.</p>
+
+  <div class="flags">
+    <div class="flag"><b>Automated WCAG 2.0 and 2.1 A + AA scan, all six pages</b><span>0 violations</span></div>
+    <div class="flag"><b>Lowest text contrast anywhere in the colour system</b><span>5.00 : 1</span></div>
+    <div class="flag"><b>Every function reachable by keyboard alone</b><span>Verified</span></div>
+    <div class="flag"><b>Visible focus ring on every control, on light and dark</b><span>Verified</span></div>
+    <div class="flag"><b>Page readable and navigable with JavaScript off</b><span>Verified</span></div>
+    <div class="flag"><b>Layout holds at 200% zoom</b><span>Verified</span></div>
+    <div class="flag"><b>Minimum tap target on a phone</b><span>44 &times; 44 px</span></div>
+  </div>
+
+  <h3>What that means in practice</h3>
+  <ul>
+    <li class="dim">A skip link is the very first thing a keyboard visitor reaches, and it moves
+      focus into the main content.</li>
+    <li class="dim">The mobile menu is built on a native disclosure, so it opens even without
+      JavaScript. With JavaScript it also locks the background, keeps focus inside the panel, and
+      returns focus to the button when it closes.</li>
+    <li class="dim">Form errors appear beside the field, are announced to screen readers, and never
+      rely on colour alone to communicate the problem.</li>
+    <li class="dim">Inputs are set at a size that stops phones zooming in when a field is tapped.</li>
+  </ul>
+
+  <div class="panel--deep panel">
+    <h4>Reduced motion</h4>
+    <p class="dim">Some people experience motion sickness from moving interfaces, and their device
+      can say so. On this site that setting produces the same compositions arriving instantly — no
+      preloader, no parallax, no scroll effects, and nothing left invisible. It is a designed mode,
+      not a broken version of the page.</p>
+  </div>
+</section>
+
+<!-- ============ 09 ENGINEERING ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>10</b>Engineering &amp; performance</p>
+    <h2 class="station__title">Built for an ordinary <em>Android phone.</em></h2>
+  </div>
+
+  <p class="lead">The site targets real devices on ordinary mobile networks, not flagship handsets on
+    office broadband. There are no frameworks and no third-party dependencies of any kind — nothing
+    on the page is fetched from anyone else&rsquo;s server.</p>
+
+  <table>
+    <th>File</th><th>Size</th><th>Sent as</th>
+    <tr><td>Stylesheet</td><td class="num">73.5 kB</td><td class="num">16.7 kB compressed</td></tr>
+    <tr><td>Main script</td><td class="num">30.0 kB</td><td class="num">8.8 kB compressed</td></tr>
+    <tr><td>Enquiry builder</td><td class="num">1.5 kB</td><td class="num">0.8 kB compressed</td></tr>
+    <tr><td>Homepage markup</td><td class="num">22.9 kB</td><td class="num">5.7 kB compressed</td></tr>
+    <tr><td>Two brand fonts</td><td class="num">34.3 kB</td><td>Self-hosted, subset</td></tr>
+  </table>
+  <p class="dim" style="margin-top:3mm">The stylesheet is heavily commented on purpose, so whoever
+    maintains it can read the reasoning. Comments cost nothing once compressed.</p>
+
+  <h3>How the movement is kept cheap</h3>
+  <ul>
+    <li class="dim">A single animation loop drives every scroll-linked value on the page. Positions
+      are measured once and re-measured only when the window changes or the fonts land — never while
+      scrolling.</li>
+    <li class="dim">Only properties that the graphics hardware can handle are animated. Nothing that
+      forces the browser to recalculate the layout moves during a scroll.</li>
+    <li class="dim">Parallax is capped at a very small distance and switched off entirely on touch
+      devices, where it would otherwise fight the natural feel of scrolling.</li>
+    <li class="dim">Every image declares its dimensions, so nothing jumps around while the page
+      loads.</li>
+    <li class="dim">Every event listener is released when the visitor leaves the page, so returning
+      via the back button never leaves duplicated behaviour behind.</li>
+  </ul>
+
+  <div class="panel">
+    <h4>Why there is no animation library</h4>
+    <p class="dim">Everything the motion system needs is built into modern browsers. A library would
+      have added weight to every page load and created a second source of truth for timing, without
+      changing a single frame on the devices this site is built for.</p>
+  </div>
+</section>
+
+<!-- ============ 10 TESTING ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>11</b>Testing</p>
+    <h2 class="station__title">What was actually <em>checked.</em></h2>
+  </div>
+
+  <p class="lead">The site was not signed off by looking at the code. It was loaded in a real browser
+    and driven automatically — the checks below all pass against the exact version that is live.</p>
+
+  <div class="flags">
+    <div class="flag"><b>Source, metadata, token and contrast checks</b><span>1,650 passed</span></div>
+    <div class="flag"><b>WhatsApp message-builder tests</b><span>8 passed</span></div>
+    <div class="flag"><b>Layout across widths, six pages each</b><span>21 widths</span></div>
+    <div class="flag"><b>Accessibility scan at phone and laptop size</b><span>0 violations</span></div>
+    <div class="flag"><b>200% zoom, three screen sizes</b><span>Passed</span></div>
+    <div class="flag"><b>JavaScript disabled, six pages</b><span>Passed</span></div>
+    <div class="flag"><b>Reduced motion, six pages</b><span>Passed</span></div>
+    <div class="flag"><b>Repeat navigation and browser back</b><span>Passed</span></div>
+  </div>
+
+  <h3>Also verified by machine</h3>
+  <ul>
+    <li class="dim">Every internal link and every in-page anchor on every page resolves.</li>
+    <li class="dim">The mobile menu opens, traps focus, closes on Escape, returns focus to its
+      button, releases the background, and is never left open after a back-button navigation.</li>
+    <li class="dim">Submitting the contact form empty does not navigate away and explains what is
+      missing; a completed enquiry produces a WhatsApp draft addressed to the correct number, with
+      the preview text and the link matching exactly.</li>
+    <li class="dim">Choosing smart vending hides the quantity field and requires building details
+      instead — and a stale quantity never survives into the message.</li>
+    <li class="dim">An unrecognised product in a link falls back to a general rice enquiry rather
+      than being accepted.</li>
+  </ul>
+
+  <div class="panel">
+    <h4>No test ever sends an enquiry</h4>
+    <p class="dim">The automated checks inspect the generated WhatsApp link as text. They never open
+      it and never contact any external service, so no test message has ever reached the business
+      number.</p>
+  </div>
+</section>
+
+<!-- ============ 11 PLAN ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>12</b>Forward plan</p>
+    <h2 class="station__title">What would move this <em>furthest next.</em></h2>
+  </div>
+
+  <p class="lead">These are recommendations in priority order, not commitments. Nothing here is
+    scheduled or priced — see the note at the end of this section.</p>
+
+  <div class="rows">
+    <div class="row row--wide"><span class="row__i">01</span>
+      <div><span class="row__k">Confirm the outstanding facts</span>
+        <p class="row__v" style="margin-top:1.5mm">Costs nothing and improves the site immediately.
+        The details listed on the final page were deliberately left out rather than invented. Each one
+        confirmed is a question a buyer no longer has to ask.</p></div></div>
+
+    <div class="row row--wide"><span class="row__i">02</span>
+      <div><span class="row__k">A custom domain</span>
+        <p class="row__v" style="margin-top:1.5mm">The site currently lives at a github.io address.
+        A Nafaka domain would carry considerably more weight with an institutional buyer, improve
+        search visibility, and allow matching business email. GitHub Pages supports this directly and
+        issues a certificate automatically.</p></div></div>
+
+    <div class="row row--wide"><span class="row__i">03</span>
+      <div><span class="row__k">Replace campaign imagery with real photography</span>
+        <p class="row__v" style="margin-top:1.5mm">The single biggest available gain in credibility.
+        Genuine photographs of Nafaka&rsquo;s own rice, people, stock and premises would let the site
+        show the business rather than represent it. The layouts are already built around the same
+        crops, so replacement is straightforward — the guidance is recorded in the repository.</p></div></div>
+
+    <div class="row row--wide"><span class="row__i">04</span>
+      <div><span class="row__k">Know whether it is working</span>
+        <p class="row__v" style="margin-top:1.5mm">There is currently no measurement of any kind.
+        Knowing how many people reach the contact page, which rice varieties are opened most, and how
+        many enquiries begin would turn the site into something that can be improved with evidence
+        rather than opinion. This should be chosen with privacy in mind.</p></div></div>
+
+    <div class="row row--wide"><span class="row__i">05</span>
+      <div><span class="row__k">Keep the content current</span>
+        <p class="row__v" style="margin-top:1.5mm">As grades, varieties or vending locations change,
+        the pages should follow. The build is arranged so the shared header, footer and metadata are
+        written once, which makes routine edits low-risk.</p></div></div>
+  </div>
+
+  <h4 style="margin-top:6mm">Worth considering later</h4>
+  <ul>
+    <li class="dim">Individual pages for each rice variety, once there is confirmed detail to put
+      on them.</li>
+    <li class="dim">A short, honest set of client references or case notes, if any customer is
+      willing to be named.</li>
+    <li class="dim">A downloadable company profile or capability statement for institutional
+      procurement.</li>
+    <li class="dim">A map or list of the areas actually served, once coverage is confirmed.</li>
+  </ul>
+
+  <div class="panel">
+    <h4>On commercial terms</h4>
+    <p class="dim">This document deliberately contains no fees, rates or timelines. None were agreed
+      for this pass, and inventing them would be worse than leaving them out. Any of the items above
+      can be quoted separately once scope is chosen.</p>
+  </div>
+</section>
+
+<!-- ============ 12 OUTSTANDING ============ -->
+<section class="page">
+  <div class="station">
+    <p class="station__eyebrow"><b>13</b>Still to confirm</p>
+    <h2 class="station__title">What the site does <em>not</em> say.</h2>
+  </div>
+
+  <p class="lead">Everything below was left off the website on purpose, because it could not be
+    confirmed. Publishing a guess about any of it would risk a commitment the business had not
+    actually made. Each item is ready to be added as soon as it is confirmed.</p>
+
+  <table>
+    <th>Area</th><th>Not published</th>
+    <tr><td>Product</td><td>Pack sizes, minimum order quantities, current grades, current stock</td></tr>
+    <tr><td>Commercial</td><td>Prices, payment terms, discount structures</td></tr>
+    <tr><td>Delivery</td><td>Delivery times, delivery guarantees, geographic coverage</td></tr>
+    <tr><td>Credentials</td><td>Certifications, customer counts, named clients, partnerships, market share</td></tr>
+    <tr><td>Capacity</td><td>Warehouse capacity, branch locations, stocking frequency</td></tr>
+    <tr><td>Vending</td><td>Payment technology, machine capacity, refill schedules, availability guarantees</td></tr>
+  </table>
+
+  <div class="panel">
+    <h4>One conflict to resolve</h4>
+    <p class="dim">The two company documents provided list different street addresses. Rather than
+      choose between them, the website publishes only the postal address they share — P.O. Box 10463,
+      Kampala. Confirming the correct street address would let a physical location be shown, which
+      matters to institutional buyers.</p>
+  </div>
+
+  <h3>Where everything lives</h3>
+  <table>
+    <tr><td>Live website</td><td>https://cartelug.github.io/Nafaka_Foods_Website/</td></tr>
+    <tr><td>Source code</td><td>github.com/cartelug/Nafaka_Foods_Website</td></tr>
+    <tr><td>Release commit</td><td>f58ccedada1470f10ffa7c9e75136464a77c52ee</td></tr>
+    <tr><td>Technical notes</td><td>REVIEW.md in the repository</td></tr>
+    <tr><td>Image provenance</td><td>assets/IMAGE-PROVENANCE.md in the repository</td></tr>
+  </table>
+
+  <p class="dim" style="margin-top:8mm;font-size:8pt">The website is a static site. It requires no
+    build step, no server and no database, and hosting is currently free. That is a deliberate
+    choice: it keeps running costs at essentially nothing and means there is no software to keep
+    patched.</p>
+</section>
+
+</body>
+</html>

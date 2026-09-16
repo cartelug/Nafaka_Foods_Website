@@ -226,7 +226,22 @@ zoom, the JavaScript-disabled document, reduced motion, and repeat navigation.
 It sends no enquiry and makes no external request — the draft is inspected as a
 URL and never opened.
 
-## 12. Still to be confirmed by the client
+## 12. The client report
+
+`documents/Nafaka_Foods_Website_Report_and_Plan.pdf` is a fourteen-page report
+and forward plan written for Nafaka rather than for developers: what was built,
+what was verified, how it looks, and what would move the site furthest next. It
+carries no fees or timelines, because none were agreed for this pass.
+
+It is set in the website's own Newsreader and Manrope, so it is rendered by
+Chromium rather than a PDF library — nothing else can read the brand's WOFF2
+files. Edit `documents/report-source/report.html` and rebuild:
+
+```sh
+NODE_PATH=<playwright> documents/report-source/build.sh
+```
+
+## 13. Still to be confirmed by the client
 
 Unchanged from the previous release, and still deliberately absent from the
 site: pack sizes, minimum order quantities, current grades, current stock,
