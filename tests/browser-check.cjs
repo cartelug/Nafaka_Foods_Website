@@ -1,6 +1,10 @@
-/* Run with playwright and @axe-core/playwright available on NODE_PATH.
- * Optional CHROMIUM_EXECUTABLE_PATH selects an installed browser binary.
- * Starts its own local server; does not send any enquiry or external message.
+/* Rendered-site checks: layout, interaction, accessibility and fail-safes.
+ *
+ * Needs playwright and @axe-core/playwright on NODE_PATH. Starts its own
+ * local server. Sends no enquiry and makes no external request — the WhatsApp
+ * draft is inspected as a URL, never opened.
+ *
+ *   NODE_PATH=... node tests/browser-check.cjs
  */
 const { chromium } = require('playwright');
 const { default: AxeBuilder } = require('@axe-core/playwright');
@@ -8,95 +12,432 @@ const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
+
 const root = path.resolve(__dirname, '..');
 const output = process.env.QA_OUTPUT || '/tmp/nafaka-browser-review';
-const pages = ['index.html', 'about.html', 'products.html', 'services.html', 'contact.html'];
-const issues = [], results = [];
+const PORT = Number(process.env.QA_PORT || 8767);
+const base = `http://127.0.0.1:${PORT}`;
+const PAGES = ['index.html', 'about.html', 'products.html', 'services.html', 'contact.html', '404.html'];
+
+// Every width the brief asks for, plus the intermediate states between them.
+const WIDTHS = [320, 360, 375, 390, 393, 412, 414, 430, 540, 600, 700, 768, 834, 900, 1024,
+                1180, 1280, 1366, 1440, 1600, 1920];
+const TALL = { 320: 568, 360: 800, 375: 812, 390: 844, 393: 873, 412: 915, 414: 896, 430: 932 };
+
+const issues = [];
+const notes = [];
+const fail = message => issues.push(message);
+const ok = message => notes.push(message);
+
+// Assertions record a finding and let the run continue, so one pass reports
+// everything rather than stopping at the first problem.
+const check = async (label, fn) => {
+  try { await fn(); } catch (error) { fail(`${label}: ${error.message.split('\n')[0]}`); }
+};
+
 fs.mkdirSync(output, { recursive: true });
-const server = spawn('python3', ['-m', 'http.server', '8767', '--bind', '127.0.0.1'], { cwd: root, stdio: 'ignore' });
-let browser;
-async function settle(page) {
+const server = spawn('python3', ['-m', 'http.server', String(PORT), '--bind', '127.0.0.1'],
+  { cwd: root, stdio: 'ignore' });
+
+const wire = (page, label) => {
+  page.on('pageerror', e => fail(`${label}: uncaught ${e.message}`));
+  page.on('console', m => { if (m.type() === 'error') fail(`${label}: console ${m.text()}`); });
+  page.on('requestfailed', r => fail(`${label}: request failed ${r.url()}`));
+  page.on('response', r => { if (r.status() >= 400) fail(`${label}: HTTP ${r.status()} ${r.url()}`); });
+};
+
+const settle = async (page, ms = 2800) => {
+  await page.evaluate(async () => { try { await document.fonts.ready; } catch (e) { /* no-op */ } });
+  await page.waitForTimeout(ms);
+};
+
+const walk = async page => {
   await page.evaluate(async () => {
-    await document.fonts.ready;
     for (const img of document.images) img.loading = 'eager';
-    await Promise.all([...document.images].map(img => img.decode().catch(() => {})));
-    // Exercise every reveal using actual scroll before taking full-page captures.
-    for (let y = 0; y < document.body.scrollHeight; y += innerHeight * .75) {
-      scrollTo(0, y); await new Promise(r => setTimeout(r, 30));
+    await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+    for (let y = 0; y < document.body.scrollHeight; y += innerHeight * 0.7) {
+      scrollTo(0, y);
+      await new Promise(r => setTimeout(r, 40));
     }
     scrollTo(0, 0);
   });
-  await page.waitForTimeout(750);
-}
+  await page.waitForTimeout(500);
+};
+
 (async () => {
-  for (let n = 0; n < 30; n++) {
-    try { await fetch('http://127.0.0.1:8767'); break; } catch { await new Promise(r => setTimeout(r, 100)); }
+  for (let n = 0; n < 60; n += 1) {
+    try { await fetch(base); break; } catch { await new Promise(r => setTimeout(r, 100)); }
   }
-  browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined, args: ['--disable-gpu', '--disable-dev-shm-usage'] });
-  for (const width of [320, 360, 390, 430, 768, 1024, 1440]) {
-    const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined,
+    args: ['--disable-gpu', '--disable-dev-shm-usage']
+  });
+
+  /* ---- 1. Layout across every width, including the intermediates ---------- */
+  for (const width of WIDTHS) {
+    const height = TALL[width] || (width < 900 ? 800 : 900);
+    const context = await browser.newContext({
+      viewport: { width, height }, isMobile: width < 900, hasTouch: width < 900,
+      reducedMotion: 'reduce'
+    });
     const page = await context.newPage();
-    page.on('pageerror', e => issues.push(`${width}: script error ${e.message}`));
-    page.on('response', r => { if (r.status() >= 400) issues.push(`${width}: HTTP ${r.status()} ${r.url()}`); });
-    for (const filename of pages) {
-      await page.goto(`http://127.0.0.1:8767/${filename}`);
-      await settle(page);
-      const layout = await page.evaluate(() => ({ overflow: document.documentElement.scrollWidth > innerWidth + 1, broken: [...document.images].filter(i => !i.naturalWidth).map(i => i.src), heading: document.querySelector('h1').innerText }));
-      if (layout.overflow) issues.push(`${filename} ${width}: horizontal overflow`);
-      if (layout.broken.length) issues.push(`${filename} ${width}: broken images ${layout.broken}`);
-      if ([390, 1440].includes(width)) {
-        await page.screenshot({ path: `${output}/${filename.replace('.html', '')}-${width}.png`, fullPage: true });
-        const a11y = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
-        for (const v of a11y.violations) issues.push({ page: filename, width, rule: v.id, impact: v.impact, nodes: v.nodes.map(n => ({ target: n.target, summary: n.failureSummary })) });
-      }
-      if (width <= 850) {
-        await page.locator('.menu summary').click();
-        assert.equal(await page.locator('main').evaluate(el => el.inert), true);
-        await page.keyboard.press('Escape');
-        assert.equal(await page.locator('.menu').evaluate(el => el.open), false);
-      }
-      const faq = page.locator('.faq-list details').first();
-      if (await faq.count()) { await faq.locator('summary').click(); assert.equal(await faq.evaluate(el => el.open), true); }
-      results.push(`${filename} ${width}: layout, images, menu and FAQ checked`);
+    wire(page, `w${width}`);
+    for (const file of PAGES) {
+      await page.goto(`${base}/${file}`, { waitUntil: 'load' });
+      await settle(page, 600);
+      await walk(page);
+      const state = await page.evaluate(() => {
+        const wide = [...document.querySelectorAll('body *')]
+          .filter(el => el.getBoundingClientRect().right > innerWidth + 1.5)
+          .slice(0, 4).map(el => el.tagName + '.' + (el.className || '').toString().slice(0, 40));
+        const small = [...document.querySelectorAll('a[href], button, summary, select, input, textarea')]
+          .filter(el => {
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && r.height > 0 && (r.height < 44 || r.width < 44)
+              && !el.closest('.chapters, .route-rail, .masthead__crumb, .footer-links, .field');
+          })
+          .slice(0, 4).map(el => `${el.tagName}:${(el.textContent || '').trim().slice(0, 22)}`);
+        return {
+          overflow: document.documentElement.scrollWidth - innerWidth,
+          wide,
+          small,
+          broken: [...document.images].filter(i => !i.naturalWidth).map(i => i.currentSrc || i.src),
+          h1: document.querySelectorAll('h1').length,
+          gateVisible: !!document.querySelector('.grain-gate:not([hidden])')
+            && getComputedStyle(document.querySelector('.grain-gate')).display !== 'none'
+        };
+      });
+      if (state.overflow > 1) fail(`${file} @${width}: horizontal overflow ${state.overflow}px ${state.wide}`);
+      if (state.broken.length) fail(`${file} @${width}: broken image ${state.broken}`);
+      if (state.h1 !== 1) fail(`${file} @${width}: ${state.h1} h1 elements`);
+      if (state.small.length) fail(`${file} @${width}: touch target under 44px ${state.small}`);
+      if (state.gateVisible) fail(`${file} @${width}: preloader still covering under reduced motion`);
     }
+    ok(`layout, images, targets and headings checked on ${PAGES.length} pages @${width}`);
     await context.close();
   }
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  const page = await context.newPage();
-  await page.goto('http://127.0.0.1:8767/contact.html?product=Basmati%20rice');
-  assert.equal(await page.locator('#product').inputValue(), 'Basmati rice');
-  await page.locator('#name').fill('Amina & Co.');
-  await page.locator('#location').fill('Kampala');
-  await page.locator('#quantity').fill('100 kg');
-  await page.locator('button[type=submit]').click();
-  assert.equal(await page.locator('#message-preview').isVisible(), true);
-  const draftUrl = new URL(await page.locator('#whatsapp-send').getAttribute('href'));
-  assert.equal(draftUrl.hostname, 'wa.me');
-  assert.equal(draftUrl.pathname, '/256776974521');
-  assert.ok(draftUrl.searchParams.get('text').includes('Quantity: 100 kg'));
-  await page.locator('#product').selectOption('Smart vending');
-  await page.locator('#details').fill('   ');
-  await page.locator('button[type=submit]').click();
-  assert.equal(await page.locator('#message-preview').isVisible(), false);
-  await page.locator('#product').selectOption('Beans');
-  await page.locator('button[type=submit]').click();
-  assert.equal(await page.locator('#message-preview').isVisible(), true);
-  await page.locator('#product').selectOption('Smart vending');
-  await page.locator('#details').fill('Office building in Kampala, 80 visitors per day.');
-  await page.locator('button[type=submit]').click();
-  assert.ok(!(await page.locator('#message-text').innerText()).includes('Quantity:'));
-  results.push('Product prefill, exact WhatsApp recipient, draft encoding, vending fields and stale validation regression passed.');
-  await context.close();
-  const noJS = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
-  const fallback = await noJS.newPage();
-  await fallback.goto('http://127.0.0.1:8767/contact.html');
-  assert.equal(await fallback.locator('.no-js-note').isVisible(), true);
-  assert.equal(await fallback.locator('button[type=submit]').isDisabled(), true);
-  await fallback.locator('.menu summary').click();
-  assert.equal(await fallback.locator('.menu-panel').isVisible(), true);
-  results.push('No-JavaScript contact fallback and native mobile navigation passed.');
-  await noJS.close();
-  fs.writeFileSync(`${output}/results.json`, JSON.stringify({ results, issues }, null, 2));
-  console.log(JSON.stringify({ checks: results.length, issues }, null, 2));
-  if (issues.length) process.exitCode = 1;
-})().catch(e => { console.error(e); process.exitCode = 1; }).finally(async () => { if (browser) await browser.close(); server.kill(); });
+
+  /* ---- 2. Interaction, at a phone and a laptop --------------------------- */
+  for (const width of [390, 1440]) {
+    const context = await browser.newContext({
+      viewport: { width, height: width < 900 ? 844 : 900 },
+      isMobile: width < 900, hasTouch: width < 900
+    });
+    const page = await context.newPage();
+    wire(page, `ux${width}`);
+
+    for (const file of PAGES) {
+      await page.goto(`${base}/${file}`, { waitUntil: 'load' });
+      await settle(page);
+
+      // The preloader must always clear itself.
+      const gate = await page.evaluate(() => {
+        const el = document.querySelector('.grain-gate');
+        return !el || el.hasAttribute('hidden') || getComputedStyle(el).display === 'none';
+      });
+      if (!gate) fail(`${file} @${width}: preloader did not lift`);
+
+      // Nothing may be left hidden waiting for an animation.
+      const stuck = await page.evaluate(() => {
+        for (const el of document.querySelectorAll('[data-reveal]')) {
+          const r = el.getBoundingClientRect();
+          if (r.top < innerHeight && r.bottom > 0 && !el.classList.contains('is-in')) {
+            return el.dataset.reveal + ' / ' + (el.className || el.tagName);
+          }
+        }
+        return null;
+      });
+      if (stuck) fail(`${file} @${width}: reveal never released (${stuck})`);
+
+      // Accordions.
+      await check(`${file} @${width} accordion`, async () => {
+        const acc = page.locator('.accordion__item').first();
+        if (!(await acc.count())) return;
+        await acc.locator('summary').click();
+        assert.equal(await acc.evaluate(el => el.open), true, 'did not open');
+        await acc.locator('summary').click();
+        assert.equal(await acc.evaluate(el => el.open), false, 'did not close');
+      });
+
+      // Mobile menu: open, trap, escape, focus restore, link-close.
+      if (width < 900) await check(`${file} @${width} menu`, async () => {
+        const trigger = page.locator('.menu-trigger');
+        await trigger.click();
+        await page.waitForTimeout(500);
+        assert.equal(await page.locator('.menu').evaluate(el => el.open), true, `${file}: menu did not open`);
+        assert.equal(await page.locator('main').evaluate(el => el.inert), true, `${file}: page not inert behind menu`);
+        assert.equal(await trigger.getAttribute('aria-expanded'), 'true', `${file}: aria-expanded not set`);
+        // body carries overflow-x:clip site-wide, so the lock shows on the
+        // block axis only — the inline axis reads "clip" either way.
+        assert.equal(await page.evaluate(() => getComputedStyle(document.body).overflowY), 'hidden',
+          `${file}: background scroll not locked`);
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(600);
+        assert.equal(await page.locator('.menu').evaluate(el => el.open), false, `${file}: Escape did not close menu`);
+        assert.equal(await page.evaluate(() => document.activeElement.classList.contains('menu-trigger')), true,
+          `${file}: focus not restored to the trigger`);
+        assert.equal(await page.locator('main').evaluate(el => el.inert), false, `${file}: inert not released`);
+        assert.notEqual(await page.evaluate(() => getComputedStyle(document.body).overflowY), 'hidden',
+          `${file}: scroll lock not released`);
+
+        await trigger.click();
+        await page.waitForTimeout(500);
+        await page.locator('.menu-panel a[href="about.html"]').click();
+        await page.waitForLoadState('load');
+        await settle(page, 1200);
+        assert.equal(await page.locator('.menu').evaluate(el => el.open), false,
+          `${file}: menu still open after navigating`);
+        await page.goBack();
+        await settle(page, 1200);
+        assert.equal(await page.locator('.menu').evaluate(el => el.open), false,
+          `${file}: stale menu after history back`);
+      });
+    }
+
+    /* ---- 3. The enquiry form ------------------------------------------- */
+    await check(`form @${width}`, async () => {
+    await page.goto(`${base}/contact.html`, { waitUntil: 'load' });
+    await settle(page);
+
+    // Empty submit must not navigate and must explain what is missing.
+    await page.locator('#enquiry-form button[type="submit"]').click();
+    await page.waitForTimeout(300);
+    assert.ok(page.url().endsWith('contact.html'), 'empty submit navigated away');
+    assert.equal(await page.locator('#name-error').innerText() !== '', true, 'no inline error for the name field');
+    assert.equal(await page.locator('#enquiry-draft').isHidden(), true, 'draft shown for an invalid form');
+
+    // The vending route swaps quantity for building context.
+    await page.locator('[data-route-product="Smart vending"]').click();
+    await page.waitForTimeout(200);
+    assert.equal(await page.locator('#product').inputValue(), 'Smart vending', 'route did not set the product');
+    assert.equal(await page.locator('#quantity-field').isHidden(), true, 'quantity still shown for vending');
+    assert.equal(await page.locator('#details').evaluate(el => el.required), true, 'building detail not required');
+
+    // A complete grain enquiry produces a reviewable draft and sends nothing.
+    await page.selectOption('#product', 'Basmati rice');
+    await page.fill('#name', 'QA Buyer');
+    await page.fill('#location', 'Kampala');
+    await page.fill('#quantity', '100 kg');
+    await page.locator('#enquiry-form button[type="submit"]').click();
+    await page.waitForTimeout(400);
+    const draft = await page.evaluate(() => ({
+      shown: !document.getElementById('enquiry-draft').hidden,
+      text: document.getElementById('draft-text').textContent,
+      href: document.getElementById('draft-send').getAttribute('href'),
+      target: document.getElementById('draft-send').getAttribute('target'),
+      focused: document.activeElement.id
+    }));
+    assert.equal(draft.shown, true, 'draft was not revealed');
+    assert.ok(draft.text.includes('Basmati rice'), 'draft is missing the product');
+    assert.ok(draft.text.includes('Quantity: 100 kg'), 'draft is missing the quantity');
+    const url = new URL(draft.href);
+    assert.equal(url.hostname, 'wa.me', 'draft points somewhere other than WhatsApp');
+    assert.equal(url.pathname, '/256776974521', 'draft uses the wrong recipient');
+    assert.equal(url.searchParams.get('text'), draft.text, 'draft link and preview disagree');
+    assert.equal(draft.target, '_blank', 'draft link should open a new tab');
+    assert.equal(draft.focused, 'draft-send', 'focus not moved to the send link');
+    assert.ok(page.url().endsWith('contact.html'), 'preparing a draft navigated away');
+
+    // A range link pre-selects its variety.
+    await page.goto(`${base}/contact.html?product=Super%20rice`, { waitUntil: 'load' });
+    await settle(page, 1200);
+    assert.equal(await page.locator('#product').inputValue(), 'Super rice', 'query product not applied');
+    await page.goto(`${base}/contact.html?product=<script>x()</script>`, { waitUntil: 'load' });
+    await settle(page, 1200);
+    assert.equal(await page.locator('#product').inputValue(), 'Rice — general', 'unknown product was accepted');
+    });
+
+    /* ---- 4. Keyboard path ------------------------------------------------ */
+    await check(`keyboard @${width}`, async () => {
+    await page.goto(`${base}/index.html`, { waitUntil: 'load' });
+    await settle(page);
+    await page.keyboard.press('Tab');
+    const first = await page.evaluate(() => document.activeElement.className);
+    assert.ok(first.includes('skip-link'), `first tab stop is "${first}", expected the skip link`);
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+    assert.equal(await page.evaluate(() => document.activeElement.id || location.hash), '#main',
+      'skip link did not reach main');
+    const ring = await page.evaluate(() => {
+      const el = document.querySelector('.btn');
+      el.focus();
+      const cs = getComputedStyle(el);
+      return { width: cs.outlineWidth, style: cs.outlineStyle };
+    });
+    assert.notEqual(ring.style, 'none', 'focus ring missing on buttons');
+    });
+
+    /* ---- 5. Internal links all resolve ----------------------------------- */
+    for (const file of PAGES) {
+      await page.goto(`${base}/${file}`, { waitUntil: 'load' });
+      await settle(page, 400);
+      const links = await page.evaluate(() => [...document.querySelectorAll('a[href]')]
+        .map(a => a.getAttribute('href'))
+        .filter(h => h && !/^(https?:|tel:|mailto:|#)/.test(h)));
+      for (const href of [...new Set(links)]) {
+        const target = href.split('#')[0].split('?')[0];
+        const res = await fetch(`${base}/${target}`);
+        if (!res.ok) fail(`${file}: internal link ${href} returned ${res.status}`);
+        const hash = href.includes('#') ? href.split('#')[1] : '';
+        if (hash) {
+          const found = await page.evaluate(async (args) => {
+            const html = await (await fetch(args.t)).text();
+            return html.includes(`id="${args.h}"`);
+          }, { t: target, h: decodeURIComponent(hash) });
+          if (!found) fail(`${file}: anchor #${hash} missing in ${target}`);
+        }
+      }
+    }
+    ok(`interaction, form, keyboard and link checks passed @${width}`);
+    await context.close();
+  }
+
+  /* ---- 6. Accessibility -------------------------------------------------- */
+  for (const width of [390, 1440]) {
+    const context = await browser.newContext({ viewport: { width, height: 900 },
+      isMobile: width < 900, hasTouch: width < 900 });
+    const page = await context.newPage();
+    for (const file of PAGES) {
+      await page.goto(`${base}/${file}`, { waitUntil: 'load' });
+      await settle(page);
+      await walk(page);
+      const result = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice']).analyze();
+      for (const v of result.violations) {
+        fail(`axe ${file} @${width}: ${v.id} (${v.impact}) — ` +
+             v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | '));
+      }
+      if (width === 390 || file === 'index.html') {
+        await page.screenshot({ path: `${output}/${file.replace('.html', '')}-${width}.png`, fullPage: true });
+      }
+    }
+    ok(`axe wcag2a/aa + wcag21a/aa clean on ${PAGES.length} pages @${width}`);
+    await context.close();
+  }
+
+  /* ---- 7. Zoom to 200% --------------------------------------------------- */
+  {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 1024 }, deviceScaleFactor: 1 });
+    const page = await context.newPage();
+    wire(page, 'zoom200');
+    for (const file of PAGES) {
+      await page.goto(`${base}/${file}`, { waitUntil: 'load' });
+      await page.evaluate(() => { document.documentElement.style.zoom = '2'; });
+      await settle(page, 900);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      if (overflow > 2) fail(`${file} @200% zoom: horizontal overflow ${overflow}px`);
+    }
+    ok('200% zoom produced no horizontal overflow');
+    await context.close();
+  }
+
+  /* ---- 8. JavaScript disabled -------------------------------------------- */
+  {
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    for (const file of PAGES) {
+      await page.goto(`${base}/${file}`, { waitUntil: 'load' });
+      const state = await page.evaluate(() => {
+        const gate = document.querySelector('.grain-gate');
+        const hiddenText = [...document.querySelectorAll('h1, h2, p, a[href]')]
+          .filter(el => {
+            const cs = getComputedStyle(el);
+            return cs.opacity === '0' || cs.visibility === 'hidden' || cs.display === 'none';
+          }).length;
+        return {
+          gate: gate ? getComputedStyle(gate).display : 'none',
+          h1: (document.querySelector('h1') || {}).textContent || '',
+          links: document.querySelectorAll('a[href]').length,
+          images: document.images.length,
+          hiddenText
+        };
+      });
+      if (state.gate !== 'none') fail(`${file} without JS: preloader is covering the page`);
+      if (!state.h1.trim()) fail(`${file} without JS: no visible h1`);
+      if (state.links < 10) fail(`${file} without JS: navigation missing (${state.links} links)`);
+      if (state.hiddenText > 0) fail(`${file} without JS: ${state.hiddenText} elements hidden awaiting animation`);
+    }
+    // The menu must still open with <details> alone.
+    await check('no-JS menu', async () => {
+      await page.goto(`${base}/index.html`, { waitUntil: 'load' });
+      await page.locator('.menu-trigger').click();
+      assert.equal(await page.locator('.menu').evaluate(el => el.open), true, 'does not open without JS');
+      assert.equal(await page.locator('.menu-panel a[href="contact.html"]').isVisible(), true,
+        'links not reachable without JS');
+    });
+    ok('content, navigation and the menu all work with JavaScript disabled');
+    await context.close();
+  }
+
+  /* ---- 9. Reduced motion is complete, not broken ------------------------- */
+  {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce',
+      isMobile: true, hasTouch: true });
+    const page = await context.newPage();
+    wire(page, 'reduced');
+    for (const file of PAGES) {
+      await page.goto(`${base}/${file}`, { waitUntil: 'load' });
+      await settle(page, 900);
+      const state = await page.evaluate(() => {
+        const gate = document.querySelector('.grain-gate');
+        const invisible = [...document.querySelectorAll('[data-reveal]')]
+          .filter(el => getComputedStyle(el).opacity !== '1').length;
+        const moved = [...document.querySelectorAll('.parallax > img, .parallax > picture > img')]
+          .filter(el => getComputedStyle(el).transform !== 'none').length;
+        return { gate: gate ? getComputedStyle(gate).display : 'none', invisible, moved };
+      });
+      if (state.gate !== 'none') fail(`${file} reduced motion: preloader still runs`);
+      if (state.invisible) fail(`${file} reduced motion: ${state.invisible} elements still transparent`);
+      if (state.moved) fail(`${file} reduced motion: parallax still applied`);
+    }
+    ok('reduced motion shows the full page instantly, with no preloader or parallax');
+    await context.close();
+  }
+
+  /* ---- 10. Repeat navigation leaves no duplicated listeners -------------- */
+  {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
+    wire(page, 'repeat');
+    await page.goto(`${base}/index.html`, { waitUntil: 'load' });
+    await settle(page, 1500);
+    for (let i = 0; i < 4; i += 1) {
+      await page.click('.nav-primary a[href="products.html"]');
+      await page.waitForLoadState('load');
+      await page.waitForTimeout(400);
+      await page.goBack();
+      await page.waitForLoadState('load');
+      await page.waitForTimeout(400);
+    }
+    const second = await page.evaluate(() => {
+      const gate = document.querySelector('.grain-gate');
+      return {
+        gateShown: gate ? getComputedStyle(gate).display !== 'none' : false,
+        hero: !!document.querySelector('.hero.is-in')
+      };
+    });
+    if (second.gateShown) fail('preloader replayed during same-session navigation');
+    if (!second.hero) fail('hero reveal did not run on a repeat visit');
+    ok('repeat navigation: preloader runs once per session, hero always resolves');
+    await context.close();
+  }
+
+  await browser.close();
+  server.kill();
+
+  fs.writeFileSync(path.join(output, 'report.json'),
+    JSON.stringify({ issues, notes }, null, 2));
+  notes.forEach(n => console.log('  ok  ' + n));
+  if (issues.length) {
+    console.error('\nISSUES (' + issues.length + '):');
+    issues.forEach(i => console.error('  !   ' + i));
+    process.exitCode = 1;
+  } else {
+    console.log('\nAll rendered-site checks passed. Screenshots in ' + output);
+  }
+})().catch(error => {
+  server.kill();
+  console.error(error);
+  process.exitCode = 1;
+});

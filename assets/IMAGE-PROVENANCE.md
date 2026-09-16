@@ -28,6 +28,31 @@ Production files are resized WebP exports. The generated originals are preserved
 - The vending machine remains forest green with brass trim, five shelves, a touchscreen, contactless reader, dispense flap and botanical linework.
 - No raw portrait reference is shipped publicly.
 
+## Role lock
+
+The 2026 creative-development pass changed presentation only. Every production
+image is still used in the role it already held, and `tests/check_site.py` now
+fails if a role moves between pages:
+
+| Asset | Role |
+| --- | --- |
+| `images/v3/hero-desktop-*`, `hero-mobile-*` | Homepage hero |
+| `images/v3/rice-range-*` | Homepage range stage / Grain range masthead |
+| `images/v3/supply-*` | Homepage origin story |
+| `images/v3/vending-desktop-*` | Homepage vending band |
+| `images/v3/vending-mobile-*` | Homepage vending band (small screens) / Smart vending masthead |
+
+Presentation techniques used, and nothing else: the existing desktop and mobile
+variants, controlled crops via `object-position`, fixed aspect frames,
+`clip-path` aperture reveals, parallax capped at 26px, and two tonal veils
+placed so the copy stays legible. No image was replaced, generated, re-coloured
+beyond those veils, or given a different subject.
+
+The Smart vending masthead now serves the upright vending composition at every
+width, because that page's picture column is an upright frame. It is the same
+approved photograph, in the variant prepared for that shape - the machine, the
+contactless reader and the person all stay inside the crop.
+
 ## Legacy campaign assets
 
 The earlier quality, table, rice and grains WebP assets remain in the repository for archive continuity and possible secondary use. The fresh-run pages primarily reference the images/v3 set.

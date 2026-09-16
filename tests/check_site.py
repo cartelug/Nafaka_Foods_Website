@@ -82,7 +82,7 @@ for page, doc in docs.items():
                 check(unquote(url.fragment) in docs[target].ids, f'{page}: missing anchor {value}')
             if target == 'contact.html' and 'product' in parse_qs(url.query):
                 product = parse_qs(url.query)['product'][0]
-                check(product in ['Super rice','Local rice','Pakistan rice','Basmati rice','Maize','Beans','Soya bean','Other commodities','Smart vending'], f'{page}: unsupported enquiry product {product}')
+                check(product in ['Rice — general','Super rice','Local rice','Pakistan rice','Basmati rice','Maize','Beans','Soya bean','Other commodities','Smart vending'], f'{page}: unsupported enquiry product {product}')
 
 css_path = ROOT / 'assets/css/site.css'
 css = css_path.read_text()
@@ -107,16 +107,69 @@ check((ROOT/'assets/fonts/Newsreader-OFL.txt').is_file(), 'Missing Newsreader li
 contact = (ROOT/'contact.html').read_text()
 check('type="submit" disabled' in contact, 'No-JavaScript form submit must remain disabled')
 script = (ROOT/'assets/js/site.js').read_text()
-check('textContent = draft.message' in script, 'Draft must render as plain text')
-check(not re.search(r'fetch\(|XMLHttpRequest|localStorage|sessionStorage|sendBeacon', script), 'Unexpected storage or network action')
+check('draftText.textContent = built.message' in script, 'Draft must render as plain text')
+check(not re.search(r'fetch\(|XMLHttpRequest|localStorage|sendBeacon|navigator\.send', script), 'Unexpected network action')
+# The preloader is allowed one session flag and nothing else; no enquiry data is stored.
+storage = re.findall(r'(?:session|local)Storage\.\w+\([^)]*\)', script)
+check(all(call.startswith("sessionStorage.setItem('nafaka:seen'") for call in storage),
+      f'Unexpected browser storage use: {storage}')
 check('prefers-reduced-motion' in css and 'prefers-reduced-motion' in script, 'Reduced motion support missing')
 check(not (ROOT/'assets/references/people').exists(), 'Raw reference portraits must not be committed')
+
+# Motion tokens must exist as one documented scale rather than ad-hoc numbers.
+for token in ['--dur-micro','--dur-ui','--dur-reveal','--dur-cinema',
+              '--ease-ui','--ease-editorial','--ease-image','--ease-exit']:
+    check(token + ':' in css, f'Missing motion token {token}')
+
+# Every approved production image must still be used in its established role.
+IMAGE_ROLES = {
+    'images/v3/hero-desktop-': ['index.html'],
+    'images/v3/hero-mobile-': ['index.html'],
+    'images/v3/rice-range-': ['index.html', 'products.html'],
+    'images/v3/supply-': ['index.html'],
+    'images/v3/vending-desktop-': ['index.html'],
+    'images/v3/vending-mobile-': ['index.html', 'services.html'],
+}
+def rendered_images(name):
+    """Only real picture sources count as a role; og:image is metadata."""
+    out = []
+    for tag, attrs in docs[name].tags:
+        if tag in ('img', 'source'):
+            out.append(attrs.get('src', ''))
+            out.append(attrs.get('srcset', ''))
+    return ' '.join(out)
+
+for stem, expected in IMAGE_ROLES.items():
+    used = [name for name in PAGES if stem in rendered_images(name)]
+    check(used == expected, f'Image role changed for {stem}: {used} (expected {expected})')
+
+# The preloader must never be able to hold the page open.
+check('gate-failsafe' in css, 'Preloader CSS fail-safe missing')
+check("classList.remove('js','has-gate')" in (ROOT/'index.html').read_text(),
+      'Boot script must release hidden states if site.js never runs')
+check('CEILING' in script and '1800' in script, 'Preloader hard timeout missing')
+
+# Pages are generated; a hand edit that drifts from the source must be caught.
+import subprocess
+generated = subprocess.run(['python3', str(ROOT/'tools/build_pages.py'), '--check'],
+                           capture_output=True, text=True)
+check(generated.returncode == 0, f'Generated pages are stale: {generated.stdout}{generated.stderr}')
 
 def luminance(hexcode):
     rgb = [int(hexcode[i:i+2],16)/255 for i in (1,3,5)]
     values = [x/12.92 if x <= .04045 else ((x+.055)/1.055)**2.4 for x in rgb]
     return .2126*values[0]+.7152*values[1]+.0722*values[2]
-for fg,bg in [('#17241b','#fffdf8'),('#566158','#fffdf8'),('#566158','#f7f1e3'),('#f7f1e3','#0b2b1d'),('#c2cfbf','#0b2b1d')]:
+# Every text/surface pair the design tokens actually put together.
+PAIRS = [
+    ('#17241b','#fffdf8'), ('#4d574f','#fffdf8'), ('#3d6630','#fffdf8'),   # ink / dim / accent on ivory
+    ('#17241b','#f6f0e3'), ('#4d574f','#f6f0e3'), ('#3d6630','#f6f0e3'),   # …on rice
+    ('#17241b','#e8dec9'), ('#454f47','#e8dec9'), ('#3d6630','#e8dec9'),   # …on sand
+    ('#f6f0e3','#071b12'), ('#b2c0b3','#071b12'), ('#d8b877','#071b12'),   # rice / pale / brass on deep
+    ('#f6f0e3','#0a291d'), ('#b2c0b3','#0a291d'), ('#d8b877','#0a291d'),   # …on forest
+    ('#f6f0e3','#123827'), ('#b2c0b3','#123827'), ('#d8b877','#123827'),   # …on moss
+    ('#8a2f10','#fffdf8'),                                                  # validation message
+]
+for fg,bg in PAIRS:
     values = sorted((luminance(fg),luminance(bg)))
     ratio = (values[1]+.05)/(values[0]+.05)
     check(ratio >= 4.5, f'Palette text contrast below 4.5: {fg} on {bg}')
